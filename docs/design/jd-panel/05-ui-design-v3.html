@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>JD Lens: UI design v3</title>
+<style>
+:root{color-scheme:light dark;--bg:#f4f3f8;--fg:#16171b;--mut:#4d5060;--card:#fff;--bd:#e8e6ef}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1013;--fg:#f2f3f7;--mut:#bcc0cc;--card:#181c25;--bd:#2a2e3a}}
+body{margin:0;padding:32px;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,"Segoe UI",system-ui,sans-serif}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:36px 0 10px}.sub{color:var(--mut);max-width:800px;margin:0 0 20px}
+.grad{height:34px;border-radius:10px;background:linear-gradient(110deg,#f5a8a0,#f4c686);margin:8px 0;max-width:520px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}.grid.w{grid-template-columns:repeat(auto-fill,minmax(520px,1fr))}
+.shot{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}.shot b{display:block;margin-bottom:6px;font-size:13px}
+.shot img{width:100%;border-radius:8px;border:1px solid var(--bd)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+table{border-collapse:collapse;background:var(--card);border:1px solid var(--bd)}td,th{border:1px solid var(--bd);padding:6px 10px;text-align:left;font-size:13px;vertical-align:top}
+code{font:12px ui-monospace,Menlo,monospace}
+</style></head><body>
+<h1>JD Lens: UI design v3</h1>
+<p class="sub">Rebuilt to follow the information architecture document. Screenshots below are generated from the real UI (light on the left, dark on the right) by <code>python3 tools/tests/render_panel.py</code>. The result of the document check is in <code>ia-validation.md</code>; the decision record is <code>docs/adr/ADR-0003-information-architecture.md</code>.</p>
+<h2>Structure</h2>
+<table>
+<tr><th>Area</th><th>Where</th><th>Tabs</th></tr>
+<tr><td>Shell</td><td>Side panel, every screen</td><td>Header (text size, pin, close), JD | Resume, refresh, Applications, Settings</td></tr>
+<tr><td>JD</td><td>Side panel</td><td>Overview, Analysis, Details</td></tr>
+<tr><td>Resume</td><td>Side panel</td><td>Profile, Skills, Experience</td></tr>
+<tr><td>Applications</td><td>Full-page view (<code>applications.html</code>)</td><td>Dashboard and details with files, gaps, rounds, status update, status history</td></tr>
+<tr><td>Settings</td><td>Side panel</td><td>Scoring, Appearance, Reading page, Local helper, Skill profile</td></tr>
+</table>
+<h2>Brand gradient</h2><div class="grad"></div>
+<p class="sub"><code>#f5a8a0</code> to <code>#f4c686</code> at 110 degrees, in both themes (<code>--grad-a</code>, <code>--grad-b</code> in <code>panel.css</code>). Used on the active navigation indicator, progress bars and the match ring, call-to-action accents and thin card borders. Not on large surfaces.</p>
+<h2>Side panel</h2><div class="grid"><div class="shot"><b>JD > Overview: summary, score, salary, threshold, flags, evidence counts</b><div class="pair"><img src="screens/01-overview-light.png" alt=""><img src="screens/01-overview-dark.png" alt=""></div></div>
+<div class="shot"><b>Overview, already applied</b><div class="pair"><img src="screens/02-overview-applied-light.png" alt=""><img src="screens/02-overview-applied-dark.png" alt=""></div></div>
+<div class="shot"><b>Overview, threshold set (slider)</b><div class="pair"><img src="screens/03-overview-threshold-light.png" alt=""><img src="screens/03-overview-threshold-dark.png" alt=""></div></div>
+<div class="shot"><b>Score change since last time (+7)</b><div class="pair"><img src="screens/04-overview-delta-light.png" alt=""><img src="screens/04-overview-delta-dark.png" alt=""></div></div>
+<div class="shot"><b>JD pinned</b><div class="pair"><img src="screens/05-overview-pinned-light.png" alt=""><img src="screens/05-overview-pinned-dark.png" alt=""></div></div>
+<div class="shot"><b>Loading skeleton</b><div class="pair"><img src="screens/06-loading-light.png" alt=""><img src="screens/06-loading-dark.png" alt=""></div></div>
+<div class="shot"><b>JD > Analysis: overview, experience alignment, key skills, requirement comparison, concerns, next steps, Pro Tip</b><div class="pair"><img src="screens/07-analysis-light.png" alt=""><img src="screens/07-analysis-dark.png" alt=""></div></div>
+<div class="shot"><b>Analysis, evidence IDs opened</b><div class="pair"><img src="screens/08-analysis-evidence-light.png" alt=""><img src="screens/08-analysis-evidence-dark.png" alt=""></div></div>
+<div class="shot"><b>Save JD confirmation</b><div class="pair"><img src="screens/09-analysis-save-card-light.png" alt=""><img src="screens/09-analysis-save-card-dark.png" alt=""></div></div>
+<div class="shot"><b>Claude job running</b><div class="pair"><img src="screens/10-analysis-running-light.png" alt=""><img src="screens/10-analysis-running-dark.png" alt=""></div></div>
+<div class="shot"><b>Tailoring proposal, approve before building</b><div class="pair"><img src="screens/11-analysis-proposal-light.png" alt=""><img src="screens/11-analysis-proposal-dark.png" alt=""></div></div>
+<div class="shot"><b>JD > Details: job details, requirements, description, your match</b><div class="pair"><img src="screens/12-details-light.png" alt=""><img src="screens/12-details-dark.png" alt=""></div></div>
+<div class="shot"><b>No JD found (paste fallback)</b><div class="pair"><img src="screens/13-no-jd-light.png" alt=""><img src="screens/13-no-jd-dark.png" alt=""></div></div>
+<div class="shot"><b>Helper not connected</b><div class="pair"><img src="screens/14-helper-missing-light.png" alt=""><img src="screens/14-helper-missing-dark.png" alt=""></div></div>
+<div class="shot"><b>Skill profile out of date</b><div class="pair"><img src="screens/15-stale-profile-light.png" alt=""><img src="screens/15-stale-profile-dark.png" alt=""></div></div>
+<div class="shot"><b>Resume > Profile</b><div class="pair"><img src="screens/16-resume-profile-light.png" alt=""><img src="screens/16-resume-profile-dark.png" alt=""></div></div>
+<div class="shot"><b>Resume > Skills</b><div class="pair"><img src="screens/17-resume-skills-light.png" alt=""><img src="screens/17-resume-skills-dark.png" alt=""></div></div>
+<div class="shot"><b>Skills, evidence opened</b><div class="pair"><img src="screens/18-resume-skills-evidence-light.png" alt=""><img src="screens/18-resume-skills-evidence-dark.png" alt=""></div></div>
+<div class="shot"><b>Resume > Experience</b><div class="pair"><img src="screens/19-resume-experience-light.png" alt=""><img src="screens/19-resume-experience-dark.png" alt=""></div></div>
+<div class="shot"><b>Settings</b><div class="pair"><img src="screens/20-settings-light.png" alt=""><img src="screens/20-settings-dark.png" alt=""></div></div>
+<div class="shot"><b>Large text (150%)</b><div class="pair"><img src="screens/21-large-text-light.png" alt=""><img src="screens/21-large-text-dark.png" alt=""></div></div>
+<div class="shot"><b>Maximum text (200%)</b><div class="pair"><img src="screens/22-max-text-light.png" alt=""><img src="screens/22-max-text-dark.png" alt=""></div></div>
+<div class="shot"><b>320px wide, 200% text</b><div class="pair"><img src="screens/23-narrow-overview-light.png" alt=""><img src="screens/23-narrow-overview-dark.png" alt=""></div></div>
+<div class="shot"><b>320px wide, Analysis</b><div class="pair"><img src="screens/24-narrow-analysis-light.png" alt=""><img src="screens/24-narrow-analysis-dark.png" alt=""></div></div>
+<div class="shot"><b>320px wide, Skills</b><div class="pair"><img src="screens/25-narrow-resume-light.png" alt=""><img src="screens/25-narrow-resume-dark.png" alt=""></div></div></div>
+<h2>Applications (full page)</h2><div class="grid w"><div class="shot wide"><b>Applications: dashboard, filters, sort, cards</b><div class="pair"><img src="screens/30-apps-dashboard-light.png" alt=""><img src="screens/30-apps-dashboard-dark.png" alt=""></div></div>
+<div class="shot wide"><b>Application details: info, files, gaps, rounds, status, history</b><div class="pair"><img src="screens/31-apps-detail-light.png" alt=""><img src="screens/31-apps-detail-dark.png" alt=""></div></div>
+<div class="shot wide"><b>Filter: interviewing, sorted by best match</b><div class="pair"><img src="screens/32-apps-interviewing-light.png" alt=""><img src="screens/32-apps-interviewing-dark.png" alt=""></div></div>
+<div class="shot wide"><b>Narrow window: list</b><div class="pair"><img src="screens/33-apps-narrow-list-light.png" alt=""><img src="screens/33-apps-narrow-list-dark.png" alt=""></div></div>
+<div class="shot wide"><b>Narrow window: detail</b><div class="pair"><img src="screens/34-apps-narrow-detail-light.png" alt=""><img src="screens/34-apps-narrow-detail-dark.png" alt=""></div></div>
+<div class="shot wide"><b>No helper: read-only snapshot</b><div class="pair"><img src="screens/35-apps-no-helper-light.png" alt=""><img src="screens/35-apps-no-helper-dark.png" alt=""></div></div>
+<div class="shot wide"><b>No applications yet</b><div class="pair"><img src="screens/36-apps-empty-light.png" alt=""><img src="screens/36-apps-empty-dark.png" alt=""></div></div>
+<div class="shot wide"><b>Large text</b><div class="pair"><img src="screens/37-apps-large-text-light.png" alt=""><img src="screens/37-apps-large-text-dark.png" alt=""></div></div></div>
+</body></html>

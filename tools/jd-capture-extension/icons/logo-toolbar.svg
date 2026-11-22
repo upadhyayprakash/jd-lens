@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="JD Lens">
+  <defs>
+    <linearGradient id="lg" x1="8" y1="6" x2="122" y2="124" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#E4685D"/><stop offset="1" stop-color="#DB8F2C"/></linearGradient>
+    <mask id="lm-sheet" maskUnits="userSpaceOnUse" x="0" y="0" width="128" height="128"><rect width="128" height="128" fill="#fff"/><circle cx="70" cy="70" r="42" fill="#000"/><path d="M94 94l20 20" stroke="#000" stroke-width="22" stroke-linecap="round"/></mask>
+    <mask id="lm-lens" maskUnits="userSpaceOnUse" x="0" y="0" width="128" height="128"><rect width="128" height="128" fill="#fff"/><circle cx="70" cy="58" r="10" fill="#000"/><path d="M50 92a20 17 0 0 1 40 0z" fill="#000"/></mask>
+  </defs>
+    <!-- the job description: a sheet with a folded top-left corner -->
+  <g mask="url(#lm-sheet)" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M34 10H70a16 16 0 0 1 16 16V92a16 16 0 0 1-16 16H26a16 16 0 0 1-16-16V34z"/>
+    <path d="M34 10V34H10" stroke-width="7"/>
+  </g>
+  <!-- the lens with the candidate cut out of it -->
+  <circle cx="70" cy="70" r="34" fill="url(#lg)" mask="url(#lm-lens)"/>
+  <path d="M94 94l20 20" stroke="url(#lg)" stroke-width="13" stroke-linecap="round"/>
+</svg>

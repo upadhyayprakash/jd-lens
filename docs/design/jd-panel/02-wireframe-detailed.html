@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JD Fit side panel: wireframe 2, detailed</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px; background: #f3f3f1; color: #333; font: 13px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  h2 { font-size: 14px; margin: 26px 0 8px; }
+  p.sub { margin: 0 0 18px; color: #666; max-width: 820px; }
+  .states { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+  .col { width: 400px; }
+  .cap { font-weight: 700; margin-bottom: 6px; }
+  .panel { width: 400px; padding: 14px; background: #fafafa; border: 2px solid #555; display: flex; flex-direction: column; gap: 10px; }
+  .box { border: 2px dashed #999; background: #fff; padding: 8px 10px; }
+  .box.solid { border-style: solid; border-color: #555; }
+  .box.hi { background: #e6e6e2; border-style: solid; border-color: #222; }
+  .row { display: flex; gap: 10px; } .row > * { flex: 1; }
+  .between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .lbl { font-weight: 700; color: #222; }
+  .small { font-size: 11.5px; color: #666; }
+  .tiny { font-size: 10.5px; color: #888; }
+  .n { display: inline-block; min-width: 18px; height: 18px; line-height: 18px; text-align: center; border: 1.5px solid #222; border-radius: 50%; font-size: 11px; font-weight: 700; margin-right: 6px; background: #fff; }
+  .btn { border: 2px solid #222; padding: 6px 8px; text-align: center; font-weight: 700; background: #fff; }
+  .btn.sm { padding: 2px 8px; font-size: 12px; }
+  .chip { display: inline-block; border: 1.5px solid #777; border-radius: 12px; padding: 0 8px; margin: 2px 2px 2px 0; font-size: 12px; background: #fff; }
+  .chip.miss { border-style: dashed; } .chip.unc { border-style: dotted; border-width: 2px; }
+  .big { font-size: 40px; font-weight: 700; line-height: 1; }
+  .track { position: relative; height: 12px; border: 2px solid #555; background: #fff; margin: 8px 0 4px; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 86%; background: #bbb; }
+  .tick { position: absolute; top: -6px; bottom: -6px; width: 0; border-left: 3px solid #222; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 6px; } .tab { border: 2px solid #777; padding: 1px 8px; font-size: 12px; } .tab.on { background: #ddd; border-color: #222; font-weight: 700; }
+  .cmd { display: flex; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+  .cmd .code { flex: 1; border: 2px dashed #888; padding: 6px 8px; font: 11px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; background: #fff; }
+  .cmd .copy { width: 58px; border: 2px solid #222; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #fff; }
+  .step { font-weight: 700; margin: 8px 0 3px; font-size: 12.5px; }
+  .banner { border: 2px solid #222; background: #ececd8; padding: 6px 10px; font-size: 12px; }
+  .center { text-align: center; padding: 30px 12px; }
+  table { border-collapse: collapse; width: 1100px; background: #fff; }
+  td, th { border: 1px solid #aaa; padding: 6px 8px; text-align: left; vertical-align: top; font-size: 12.5px; }
+  th { background: #e9e9e6; }
+  code { font: 11.5px ui-monospace, Menlo, monospace; background: #eee; padding: 0 3px; }
+</style>
+</head>
+<body>
+<h1>JD Fit side panel: wireframe 2 (detailed, lo-fi)</h1>
+<p class="sub">Same layout as wireframe 1, now with real content (the Northwind page as the example), the other states, and every element tied to the feature that feeds it (table at the bottom). Still greyscale: colour, type, spacing and light/dark come in the final design after you confirm this.</p>
+
+<div class="states">
+
+<!-- STATE A -->
+<div class="col">
+  <div class="cap">A. Scored JD (main state)</div>
+  <div class="panel">
+    <div class="box solid between"><span><span class="n">1</span><b>JD Fit</b></span><span class="small">profile: 21 Nov 2026</span><span class="btn sm">gear</span></div>
+
+    <div class="box"><span class="n">2</span><b>Northwind</b>
+      <div>Senior Full Stack Engineer - EMEA</div>
+      <div class="small">India, Pakistan, Philippines +20 more · Remote-first · Full-time</div>
+      <div class="tiny">northwind.example/careers/job/1946e291...</div>
+    </div>
+
+    <div class="row">
+      <div class="box hi"><span class="n">3</span><span class="lbl">SCORE</span>
+        <div class="big">86</div>
+        <div class="small">Must-haves 10 of 11<br>Nice-to-haves 3 of 4</div>
+      </div>
+      <div class="box hi"><span class="n">4</span><span class="lbl">SALARY</span>
+        <div style="font-size:19px;font-weight:700;margin:4px 0 2px">$60k - $100k</div>
+        <div class="small">USD, gross base, as written. "Localized to your country's currency."</div>
+      </div>
+    </div>
+
+    <div class="box"><span class="n">5</span><span class="lbl">Threshold</span> <span class="small">not set · <u>set one</u></span>
+      <div class="track"><div class="fill"></div></div>
+      <div class="tiny">Shows above / below your marker once you set one. No verdict is given.</div>
+    </div>
+
+    <div class="box"><span class="n">6</span><span class="lbl">Flags</span>
+      <div class="small">India is on the location list. "India remote" is not stated.</div>
+      <div class="small">Posted 3 Jun 2026 (171 days ago).</div>
+      <div class="small">No scam signals found.</div>
+    </div>
+
+    <div class="box"><span class="n">7</span><span class="lbl">Evidence</span>
+      <div class="tabs"><span class="tab on">Matched 18</span><span class="tab">Missing 2</span><span class="tab">Unconfirmed 1</span></div>
+      <span class="chip">TypeScript</span><span class="chip">React</span><span class="chip">Express</span><span class="chip">NestJS</span><span class="chip">PostgreSQL</span><span class="chip">Jest</span><span class="chip">+12</span>
+      <div class="tiny" style="margin-top:4px">Missing = Vite, Cypress. Unconfirmed = Kubernetes (certificate only). Unconfirmed never raises the score.</div>
+    </div>
+
+    <div class="box solid"><div class="lbl"><span class="n">8</span>Next steps</div>
+      <div class="step">0  Save this JD</div>
+      <div class="btn">Save JD to job-inbox</div>
+      <div class="tiny" style="margin:3px 0 6px">Writes jd-northwind-senior-full-stack.json to the inbox folder in jd-lens.</div>
+
+      <div class="step">1  Add and fully score (pick the JD up from the inbox)</div>
+      <div class="cmd"><div class="code">cd "/Users/example/jd-lens" && claude "/job add --inbox"</div><div class="copy">Copy</div></div>
+
+      <div class="step">2  Applying? Propose resume edits (you approve)</div>
+      <div class="cmd"><div class="code">cd "/Users/example/jd-lens" && claude "/job tailor northwind-2026-11"</div><div class="copy">Copy</div></div>
+
+      <div class="step">3  After you approve: build the PDF and check it</div>
+      <div class="cmd"><div class="code">cd "/Users/example/jd-lens" && claude "/job build northwind-2026-11"</div><div class="copy">Copy</div></div>
+
+      <div class="step">Not for me</div>
+      <div class="cmd"><div class="code">cd "/Users/example/jd-lens" && claude "/job status northwind-2026-11 withdrawn"</div><div class="copy">Copy</div></div>
+    </div>
+
+    <div class="row"><div class="btn">Refresh score</div><div class="btn">Settings</div></div>
+  </div>
+</div>
+
+<!-- STATE B, C, D stacked -->
+<div class="col">
+  <div class="cap">B. No job description found on this page</div>
+  <div class="panel">
+    <div class="box solid between"><span><b>JD Fit</b></span><span class="small">profile: 21 Nov 2026</span><span class="btn sm">gear</span></div>
+    <div class="box center"><b>No job description found</b>
+      <div class="small" style="margin:6px 0 10px">Open a job posting and press Refresh. If the page hides its text, paste the JD below.</div>
+      <div class="box" style="min-height:70px;text-align:left" class="small">Paste JD text (scored the same way)</div>
+      <div class="row" style="margin-top:8px"><div class="btn">Refresh</div><div class="btn">Score pasted text</div></div>
+    </div>
+  </div>
+
+  <div class="cap" style="margin-top:22px">C. Profile out of date (banner on top of state A)</div>
+  <div class="panel">
+    <div class="banner"><b>Skill profile is older than your master file.</b> Scores may be off. Rebuild it, then Refresh.
+      <div class="cmd" style="margin:6px 0 0"><div class="code">cd "/Users/example/jd-lens" && python3 tools/build_profile.py</div><div class="copy">Copy</div></div>
+    </div>
+    <div class="small">...the rest of state A below the banner...</div>
+  </div>
+
+  <div class="cap" style="margin-top:22px">D. Settings</div>
+  <div class="panel">
+    <div class="box solid between"><span><b>Settings</b></span><span class="btn sm">back</span></div>
+    <div class="box"><span class="lbl">Threshold</span><div class="small">Score you treat as worth a look</div>
+      <div class="track"><div class="tick" style="left:60%"></div></div><div class="tiny">0 ......... 60 ......... 100 · or "none"</div></div>
+    <div class="box"><span class="lbl">Repo path</span><div class="small">Used in every command</div>
+      <div class="code" style="font:11px ui-monospace,Menlo,monospace;border:2px dashed #888;padding:5px">/Users/example/jd-lens</div></div>
+    <div class="box"><span class="lbl">Inbox folder</span><div class="small">Downloads/job-inbox (link to the repo's job-inbox)</div></div>
+    <div class="box"><span class="lbl">Theme</span> <span class="chip">System</span><span class="chip">Light</span><span class="chip">Dark</span></div>
+    <div class="box"><span class="lbl">Skill profile</span><div class="small">Built 21 Nov 2026 · 64 skills · career years 12</div>
+      <div class="btn sm" style="display:inline-block;margin-top:4px">Show what the extension holds</div></div>
+  </div>
+</div>
+
+</div>
+
+<h2>Added: profile, master resume and applications (opened from the gear)</h2>
+<div class="states">
+
+<div class="col">
+  <div class="cap">E. Gear menu (popup)</div>
+  <div class="panel">
+    <div class="box solid between"><span><b>JD Fit</b></span><span class="small">profile: 21 Nov 2026</span><span class="btn sm">gear</span></div>
+    <div class="box solid" style="margin-left:90px">
+      <div style="padding:5px 0;border-bottom:1px solid #bbb"><b>Profile and applications</b></div>
+      <div style="padding:5px 0;border-bottom:1px solid #bbb">Master resume (HTML) <span class="tiny">opens new tab</span></div>
+      <div style="padding:5px 0;border-bottom:1px solid #bbb">Master resume (PDF) <span class="tiny">opens new tab</span></div>
+      <div style="padding:5px 0;border-bottom:1px solid #bbb">Settings</div>
+      <div style="padding:5px 0">Rebuild skill profile <span class="tiny">copies command</span></div>
+    </div>
+    <div class="tiny">Opens local files from the repo in a new Chrome tab. Nothing is uploaded.</div>
+  </div>
+
+  <div class="cap" style="margin-top:22px">H. You already applied to this job (banner on state A)</div>
+  <div class="panel">
+    <div class="banner"><b>You applied to this on 21 Nov 2026.</b> Status: applied · Resume sent: alex_morgan_resume_northwind.pdf
+      <div style="margin-top:6px"><span class="btn sm">Open resume</span> <span class="btn sm">Details</span></div></div>
+    <div class="small">...state A below. Matched by posting URL, or by company if the URL differs.</div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="cap">F. Profile and applications</div>
+  <div class="panel">
+    <div class="box solid between"><span><b>Profile and applications</b></span><span class="btn sm">back</span></div>
+    <div class="box"><span class="lbl">Your master data</span>
+      <div class="small">Skill profile built 21 Nov 2026 · 64 skills · career years 12</div>
+      <div class="row" style="margin-top:6px"><div class="btn sm">Open as HTML</div><div class="btn sm">Open as PDF</div></div>
+      <div class="tiny" style="margin-top:4px">The full file (all facts, open confirmations) opens in a new tab. It is not copied into the extension.</div>
+    </div>
+    <div class="box"><span class="lbl">Applications</span> <span class="small">3 · sorted by score</span>
+      <div class="tabs" style="margin-top:6px"><span class="tab on">All</span><span class="tab">Applied</span><span class="tab">Interviewing</span><span class="tab">Considering</span></div>
+      <div class="box" style="margin-bottom:6px"><div class="between"><b>Northwind</b><span class="chip">applied</span></div><div class="small">Senior Full Stack Engineer - EMEA</div><div class="between small"><span>Score 86</span><span>21 Nov 2026</span></div></div>
+      <div class="box" style="margin-bottom:6px"><div class="between"><b>Globex</b><span class="chip">applied</span></div><div class="small">Principal Software Engineer, Agent &amp; App Platform</div><div class="between small"><span>Score not set</span><span>17 Oct 2026</span></div></div>
+      <div class="box"><div class="between"><b>Initech</b><span class="chip">applied</span></div><div class="small">Applied AI Architect (Technical Success)</div><div class="between small"><span>Score not set</span><span>19 Oct 2026</span></div></div>
+    </div>
+    <div class="btn">Open all details (new tab)</div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="cap">G. Application detail (tap a row in F)</div>
+  <div class="panel">
+    <div class="box solid between"><span><b>Northwind</b></span><span class="btn sm">back</span></div>
+    <div class="box"><div>Senior Full Stack Engineer - EMEA</div><span class="chip">applied</span> <span class="small">21 Nov 2026</span></div>
+    <div class="row">
+      <div class="box hi"><span class="lbl">FIT</span><div class="big" style="font-size:30px">86</div><div class="small">on 21 Nov 2026</div></div>
+      <div class="box hi"><span class="lbl">SALARY</span><div style="font-size:16px;font-weight:700;margin-top:4px">$60k - $100k</div><div class="small">USD, as posted</div></div>
+    </div>
+    <div class="box"><span class="lbl">Files</span>
+      <div class="row" style="margin-top:6px"><div class="btn sm">Resume sent (PDF)</div><div class="btn sm">Posting</div></div>
+      <div class="row" style="margin-top:6px"><div class="btn sm">Full details (HTML)</div><div class="btn sm">Application file</div></div>
+    </div>
+    <div class="box"><span class="lbl">Gaps noted</span><div class="small">Vite, Cypress not claimed. Kubernetes certificate only.</div>
+      <div class="tiny">Rounds: none logged yet</div></div>
+    <div class="box solid"><span class="lbl">Update from the terminal</span>
+      <div class="small" style="margin:4px 0">Change status to:</div>
+      <div><span class="chip">screening</span><span class="chip">interviewing</span><span class="chip">offer</span><span class="chip">rejected</span><span class="chip">withdrawn</span></div>
+      <div class="cmd" style="margin:6px 0 0"><div class="code">cd "/Users/example/jd-lens" && claude "/job status northwind-2026-11 screening"</div><div class="copy">Copy</div></div>
+      <div class="small" style="margin:8px 0 4px">Prepare for an interview:</div>
+      <div class="cmd" style="margin:0"><div class="code">cd "/Users/example/jd-lens" && claude "/interview prep northwind"</div><div class="copy">Copy</div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<h2>Callouts linked to features</h2>
+<table>
+<tr><th style="width:36px">#</th><th style="width:210px">Element</th><th>What feeds it</th><th style="width:300px">Feature / file (ADR-0001)</th></tr>
+<tr><td>1</td><td>Header, profile date, gear</td><td>Date the skill profile was built from the master file.</td><td><code>tools/build_profile.py</code> writes <code>profile.json</code></td></tr>
+<tr><td>2</td><td>Company, role, locations, source</td><td>schema.org JobPosting data when the page has it, else page text.</td><td>Page extraction (content script)</td></tr>
+<tr><td>3</td><td>Score, must / nice counts</td><td>Quick score: 70 x must-have + 30 x nice-to-have, same formula as the skill.</td><td><code>tools/jd-scorer/score.js</code>, shared with <code>/job score</code></td></tr>
+<tr><td>4</td><td>Salary card (highlighted)</td><td>Salary text exactly as the page states it (JSON-LD baseSalary or text). No target stored, no verdict. "Not stated on this page" when absent.</td><td>Extraction, salary field</td></tr>
+<tr><td>5</td><td>Threshold bar</td><td>A number you set in Settings. The panel only says above or below.</td><td>Extension options (<code>chrome.storage.local</code>)</td></tr>
+<tr><td>6</td><td>Flags</td><td>India and remote wording, <code>datePosted</code> age, scam signals (non-company contact domain, fees).</td><td>Eligibility checks, same as <code>/job add</code> step 3</td></tr>
+<tr><td>7</td><td>Evidence tabs</td><td>Matched, missing, and unconfirmed skills against the profile. Unconfirmed never counts.</td><td>Scorer output + master file levels</td></tr>
+<tr><td>8</td><td>Save JD, command rows, Copy</td><td>Save writes the JSON record to the inbox. Each command is plain text with the full repo path and the application slug (company-yyyy-mm). Copy puts it on the clipboard.</td><td><code>/job add --inbox</code>, <code>tailor</code>, <code>build</code>, <code>status</code></td></tr>
+<tr><td>B</td><td>Paste box</td><td>Fallback when the page hides its text. Scored the same way.</td><td>Scorer, no extraction</td></tr>
+<tr><td>C</td><td>Stale banner</td><td>Profile older than the master file's last change.</td><td>Profile timestamp vs master</td></tr>
+<tr><td>E</td><td>Gear menu links</td><td>Opens <code>views/master-resume.html</code> and <code>.pdf</code> in a new tab (file URL). The full master file stays in the repo and is never copied into the extension.</td><td><code>tools/build_views.py</code> (built)</td></tr>
+<tr><td>F</td><td>Applications list</td><td>Short summary per application (company, role, status, score, applied date, resume path, posting URL) written next to the skill profile. Sorted by score, filter by status.</td><td><code>tools/build_profile.py</code> adds <code>applications.json</code> from <code>applications/*.md</code></td></tr>
+<tr><td>G</td><td>Application detail</td><td>Opens the resume you sent, the posting and the full details page. Status changes are copyable commands, because the panel never edits your files.</td><td><code>/job status</code>, <code>/interview prep</code>, <code>views/applications.html#slug</code></td></tr>
+<tr><td>H</td><td>"Already applied" banner</td><td>The current page URL (query string ignored) or company matches an application. Stops double applications.</td><td>URL match against <code>applications.json</code></td></tr>
+<tr><td>D</td><td>"Show what the extension holds"</td><td>Opens the profile as readable text so you can see exactly what data is in the browser.</td><td>Privacy test in ADR-0001</td></tr>
+</table>
+
+<h2>Decisions I would like confirmed on this wireframe</h2>
+<ol>
+<li>Salary and score side by side at the top, both grey-filled (the two things you read first). OK?</li>
+<li>Evidence collapsed to chips behind tabs, so the commands stay near the top of the scroll. OK?</li>
+<li>Step 0 is a Save button, then three copyable commands plus "Not for me". Anything to add (for example <code>/interview add</code> after you apply)?</li>
+<li>Paste-the-JD fallback (state B) included from day one. OK?</li>
+</ol>
+</body>
+</html>

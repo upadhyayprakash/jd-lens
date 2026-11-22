@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "JD Lens",
+  "version": "1.0.0",
+  "description": "Score a job description against your resume data, then track and act on applications. Local only.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9E6FQ7j+BB4XIcXKadcn5SFdNrJ89a95orBKNBUktPmyiIyJHWaa+Hhor5CQWZSlH81qf7jfk6k6f08sE87rD+PL9rMYYZHVfI3wXgFr2fSsZ6RSfPuV9IWwl9y1f8+6ilbPebXwIIfsAXiQXdDX5elEi7zBu6JcIr7tL3c6efeOPIcUhRkwdkTWe4lHvCEgemwzVUNN4CrKhLIGtL5Zoms2RzeVnS4rCkhz3rdsp4GUjLt8EzBN8arRotsKh9pPbETURC9DgTzOtNTRb3j5jn6HIlJB5udZy9e1aDzet4+nMgAZrtVStO5lk/Y2IQE8uuk+RKQ93FQrvDMy8QVvlwIDAQAB",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "storage",
+    "nativeMessaging"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "action": {
+    "default_title": "JD Lens: score this page",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

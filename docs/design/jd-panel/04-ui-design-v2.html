@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>JD vs Resume: UI design v2</title>
+<style>
+:root{color-scheme:light dark;--bg:#f4f3f8;--fg:#16171b;--mut:#4d5060;--card:#fff;--bd:#e8e6ef}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1013;--fg:#f2f3f7;--mut:#bcc0cc;--card:#181c25;--bd:#2a2e3a}}
+body{margin:0;padding:32px;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,"Segoe UI",system-ui,sans-serif}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:36px 0 10px}.sub{color:var(--mut);max-width:780px;margin:0 0 20px}
+table{border-collapse:collapse;background:var(--card);border:1px solid var(--bd)}td,th{border:1px solid var(--bd);padding:6px 10px;text-align:left;font-size:13px;vertical-align:top}
+.sw{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid var(--bd);vertical-align:-2px;margin-right:6px}
+.grad{height:36px;border-radius:10px;background:linear-gradient(110deg,#fb8b83,#ffc376);margin:8px 0;max-width:520px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.shot{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}.shot b{display:block;margin-bottom:6px;font-size:13px}
+.shot img{width:100%;border-radius:8px;border:1px solid var(--bd)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ref{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:1100px}.ref img{width:100%;border-radius:10px;border:1px solid var(--bd)}
+code{font:12px ui-monospace,Menlo,monospace}
+</style></head><body>
+<h1>JD vs Resume: side panel UI, design v2</h1>
+<p class="sub">Built from new light and dark designs. Same features as v1, regrouped: a JD tab and a Resume tab, a summary view, and a Details and Analysis view with the next steps and a Pro Tip. Nothing was removed; what moved is listed at the bottom. Source of truth for every value: <code>tools/jd-capture-extension/panel.css</code>.</p>
+
+<h2>The two-colour gradient</h2>
+<div class="grad"></div>
+<table>
+<tr><th>Token</th><th>Light</th><th>Dark</th><th>Used for</th></tr>
+<tr><td><code>--grad-a</code> coral</td><td><span class="sw" style="background:#fb8b83"></span>#fb8b83</td><td><span class="sw" style="background:#f28e84"></span>#f28e84</td><td rowspan="2">Active tab fill and underline, threshold and match bars, the match ring, gradient borders (Pro Tip), logo, saved banner, primary buttons, selected segments, gradient text</td></tr>
+<tr><td><code>--grad-b</code> amber</td><td><span class="sw" style="background:#ffc376"></span>#ffc376</td><td><span class="sw" style="background:#f6be7d"></span>#f6be7d</td></tr>
+<tr><td><code>--grad-angle</code></td><td colspan="2">110deg (the tilt of every gradient)</td><td></td></tr>
+<tr><td><code>--grad-text-a/b</code></td><td>#e0564c, #d98412</td><td>#ff9f92, #ffd08a</td><td>Gradient text only: a deeper pair on light so small text stays readable</td></tr>
+</table>
+<p class="sub" style="margin-top:8px">These were sampled from the bars in your designs. To use your official pair, change <code>--grad-a</code> and <code>--grad-b</code> (once per theme) in <code>panel.css</code>.</p>
+
+<h2>Other tokens</h2>
+<table>
+<tr><th>Token</th><th>Light</th><th>Dark</th></tr>
+<tr><td>Page / card / chip</td><td>#fbfaff to #f3f2f8 / #ffffff / #f0eff4</td><td>#0f1013 with a soft coral glow / #181c25 / #212531</td></tr>
+<tr><td>Text, secondary, faint</td><td>#16171b, #4d5060, #7d8092</td><td>#f2f3f7, #bcc0cc, #878c9b</td></tr>
+<tr><td>Links and action pills</td><td>#4a5bdb on #e8ebff</td><td>#8d9bff / #a5b1ff on #262c52</td></tr>
+<tr><td>Flag dots</td><td colspan="2">Orange = check this, green = fine, grey = note, blue = skills match, red = scam signal. The score itself is never coloured good or bad.</td></tr>
+<tr><td>Type and shape</td><td colspan="2">System UI font. Score 44px, titles 20px, body 13px. 4px spacing grid. Radius 12 (controls), 16 (cards), pill for chips and tabs. Every size is in rem, so A-, A+ and Cmd +/- scale and reflow the whole panel.</td></tr>
+</table>
+
+<h2>Reference designs (yours)</h2>
+
+
+<h2>The build, light (left) and dark (right)</h2>
+<div class="grid">
+<div class="shot"><b>JD tab: summary, score, salary, threshold, flags, evidence</b><div class="pair"><img src="screens/01-jd-new-light.png" alt=""><img src="screens/01-jd-new-dark.png" alt=""></div></div>
+<div class="shot"><b>JD tab, already applied banner</b><div class="pair"><img src="screens/02-jd-applied-light.png" alt=""><img src="screens/02-jd-applied-dark.png" alt=""></div></div>
+<div class="shot"><b>Score change (+7) and threshold marker</b><div class="pair"><img src="screens/04-jd-score-delta-light.png" alt=""><img src="screens/04-jd-score-delta-dark.png" alt=""></div></div>
+<div class="shot"><b>Details: job details, JD highlights, description, your match</b><div class="pair"><img src="screens/06-analysis-details-light.png" alt=""><img src="screens/06-analysis-details-dark.png" alt=""></div></div>
+<div class="shot"><b>Analysis: profile overview, key skills, next steps, Pro Tip</b><div class="pair"><img src="screens/07-analysis-analysis-light.png" alt=""><img src="screens/07-analysis-analysis-dark.png" alt=""></div></div>
+<div class="shot"><b>Save JD confirmation</b><div class="pair"><img src="screens/08-analysis-save-card-light.png" alt=""><img src="screens/08-analysis-save-card-dark.png" alt=""></div></div>
+<div class="shot"><b>Claude job running</b><div class="pair"><img src="screens/09-analysis-running-light.png" alt=""><img src="screens/09-analysis-running-dark.png" alt=""></div></div>
+<div class="shot"><b>Tailoring proposal: approve before anything is built</b><div class="pair"><img src="screens/10-analysis-proposal-light.png" alt=""><img src="screens/10-analysis-proposal-dark.png" alt=""></div></div>
+<div class="shot"><b>No JD found (paste fallback)</b><div class="pair"><img src="screens/11-no-jd-light.png" alt=""><img src="screens/11-no-jd-dark.png" alt=""></div></div>
+<div class="shot"><b>Helper not connected</b><div class="pair"><img src="screens/12-helper-missing-light.png" alt=""><img src="screens/12-helper-missing-dark.png" alt=""></div></div>
+<div class="shot"><b>Skill profile out of date</b><div class="pair"><img src="screens/13-stale-profile-light.png" alt=""><img src="screens/13-stale-profile-dark.png" alt=""></div></div>
+<div class="shot"><b>Resume tab: master data and applications</b><div class="pair"><img src="screens/14-resume-light.png" alt=""><img src="screens/14-resume-dark.png" alt=""></div></div>
+<div class="shot"><b>Track Application</b><div class="pair"><img src="screens/15-detail-applied-light.png" alt=""><img src="screens/15-detail-applied-dark.png" alt=""></div></div>
+<div class="shot"><b>Qualification (saved, not applied)</b><div class="pair"><img src="screens/16-detail-qualification-light.png" alt=""><img src="screens/16-detail-qualification-dark.png" alt=""></div></div>
+<div class="shot"><b>Settings</b><div class="pair"><img src="screens/17-settings-light.png" alt=""><img src="screens/17-settings-dark.png" alt=""></div></div>
+<div class="shot"><b>Large text (150%)</b><div class="pair"><img src="screens/18-large-text-light.png" alt=""><img src="screens/18-large-text-dark.png" alt=""></div></div>
+<div class="shot"><b>Narrowest panel (320px) at 200% text</b><div class="pair"><img src="screens/20-narrow-jd-light.png" alt=""><img src="screens/20-narrow-jd-dark.png" alt=""></div></div>
+</div>
+
+<h2>Where every v1 feature went</h2>
+<table>
+<tr><th>v1 feature</th><th>In v2</th></tr>
+<tr><td>Gear menu (profile and applications, master resume HTML and PDF, open in a tab, settings, rebuild profile)</td><td>The Resume tab (master data and applications), Settings (open in a tab, rebuild profile, text size, theme). The gear is now the Settings button next to the tabs.</td></tr>
+<tr><td>Evidence tabs (matched, missing, unconfirmed)</td><td>Analysis, Key skills match (same three tabs). A short summary and the match pill stay on the JD tab.</td></tr>
+<tr><td>Next steps with terminal commands</td><td>Analysis, Next steps (cards with a Claude button). Each card keeps its command under "Run in a terminal instead".</td></tr>
+<tr><td>Save JD, full score, tailor, approve and build, not for me, questions from Claude, job progress</td><td>Next steps cards. Job progress also shows at the top of the JD tab and Analysis. Save JD is also on the JD tab banner.</td></tr>
+<tr><td>Already applied, saved, same-company banners</td><td>The banner at the top of the JD tab (gradient).</td></tr>
+<tr><td>Threshold, flags, salary, paste fallback, helper and stale banners, text size, theme, automatic reading</td><td>Kept, restyled. Text size is also A- and A+ in the header.</td></tr>
+<tr><td>New in v2</td><td>JD/Resume tab bar, Pin (keep a JD when you switch tabs), Close, score change (+7), "Update?" to note a salary you found, Match ring, Missing and Extra skills, JD highlights, Pro Tip, Details and Analysis views, new name and logo.</td></tr>
+</table>
+</body></html>

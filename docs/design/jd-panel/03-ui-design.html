@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>JD Fit: UI design</title>
+<style>
+:root{color-scheme:light dark;--bg:#f6f6f4;--fg:#1a1b1e;--mut:#55585f;--card:#fff;--bd:#dedcd6}
+@media (prefers-color-scheme:dark){:root{--bg:#141517;--fg:#ececee;--mut:#b2b5bc;--card:#1c1e21;--bd:#33363c}}
+body{margin:0;padding:32px;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,"Segoe UI",system-ui,sans-serif}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:36px 0 10px}.sub{color:var(--mut);max-width:760px;margin:0 0 20px}
+table{border-collapse:collapse;background:var(--card);border:1px solid var(--bd)}td,th{border:1px solid var(--bd);padding:6px 10px;text-align:left;font-size:13px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid var(--bd);vertical-align:-2px;margin-right:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.shot{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}.shot b{display:block;margin-bottom:6px}
+.shot img{width:100%;border-radius:8px;border:1px solid var(--bd)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+code{font:12px ui-monospace,Menlo,monospace}
+</style></head><body>
+<h1>JD Fit side panel: UI design (v1, superseded by 04-ui-design-v2.html)</h1>
+<p class="sub">The real design, built on the approved wireframes (01 and 02 in this folder). One neutral surface scale, one accent, semantic colours only for state. The score itself is never coloured good or bad: the panel shows a number and evidence and you decide. Light and dark are first-class, and "System" follows the OS. Source of truth for every value below: <code>tools/jd-capture-extension/panel.css</code>.</p>
+
+<h2>Design language</h2>
+<table>
+<tr><th>Token</th><th>Light</th><th>Dark</th><th>Used for</th></tr>
+<tr><td>Background / surface</td><td><span class="sw" style="background:#f6f6f4"></span>#f6f6f4 / <span class="sw" style="background:#fff"></span>#ffffff</td><td><span class="sw" style="background:#141517"></span>#141517 / <span class="sw" style="background:#1c1e21"></span>#1c1e21</td><td>Page and cards</td></tr>
+<tr><td>Text, secondary, faint</td><td>#1a1b1e, #55585f, #80838b</td><td>#ececee, #b2b5bc, #82858d</td><td>Hierarchy without extra colours</td></tr>
+<tr><td>Accent</td><td><span class="sw" style="background:#3347c9"></span>#3347c9</td><td><span class="sw" style="background:#8ea2ff"></span>#8ea2ff</td><td>Primary action, selection, salary card tint, score bar</td></tr>
+<tr><td>Ok / warn / bad</td><td>#1d7448 / #8f5b00 / #b3261e</td><td>#62c997 / #e3ac4e / #f2877f</td><td>Flags only (India, age, scam), never the score</td></tr>
+<tr><td>Type</td><td colspan="2">System UI font. 11, 12, 13, 15, 20 and 44 px. Weights 400, 600, 700. Mono (SF Mono / Menlo) for commands.</td><td>Score 44 px, salary 20 px</td></tr>
+<tr><td>Space and shape</td><td colspan="2">4 px grid (4, 8, 12, 16, 20, 24). Radius 8 (controls), 14 (cards), pill for chips.</td><td>Consistent rhythm</td></tr>
+<tr><td>Chips</td><td colspan="2">Solid outline = matched. Dashed = missing. Dotted = unconfirmed. Accent outline = partial. (Shape, not only colour, carries meaning.)</td><td>Evidence</td></tr>
+<tr><td>Accessibility</td><td colspan="2">Visible focus ring, labelled controls, <code>aria-live</code> for job status, reduced motion respected, text contrast checked in both themes.</td><td></td></tr>
+</table>
+
+<h2>Screens, light (left) and dark (right), linked to the features behind them</h2>
+<div class="grid">
+<div class="shot"><b>Score a JD (new page): score, salary, flags, evidence, next steps</b><div class="pair"><img src="screens/01-main-new-jd-light.png" alt="main light"><img src="screens/01-main-new-jd-dark.png" alt="main dark"></div></div>
+<div class="shot"><b>Already applied banner (matches by posting URL)</b><div class="pair"><img src="screens/02-main-applied-light.png" alt=""><img src="screens/02-main-applied-dark.png" alt=""></div></div>
+<div class="shot"><b>Threshold marker (above or below, no verdict)</b><div class="pair"><img src="screens/03-main-threshold-light.png" alt=""><img src="screens/03-main-threshold-dark.png" alt=""></div></div>
+<div class="shot"><b>Claude job running (uses Claude marker, cancel)</b><div class="pair"><img src="screens/04-main-running-light.png" alt=""><img src="screens/04-main-running-dark.png" alt=""></div></div>
+<div class="shot"><b>Tailoring proposal: approve before anything is built</b><div class="pair"><img src="screens/05-main-proposal-light.png" alt=""><img src="screens/05-main-proposal-dark.png" alt=""></div></div>
+<div class="shot"><b>No JD found: refresh or paste the text</b><div class="pair"><img src="screens/06-no-jd-light.png" alt=""><img src="screens/06-no-jd-dark.png" alt=""></div></div>
+<div class="shot"><b>Helper not connected: install command</b><div class="pair"><img src="screens/07-helper-missing-light.png" alt=""><img src="screens/07-helper-missing-dark.png" alt=""></div></div>
+<div class="shot"><b>Skill profile out of date: rebuild</b><div class="pair"><img src="screens/08-stale-profile-light.png" alt=""><img src="screens/08-stale-profile-dark.png" alt=""></div></div>
+<div class="shot"><b>Gear menu: profile, master resume HTML and PDF, settings</b><div class="pair"><img src="screens/09-menu-light.png" alt=""><img src="screens/09-menu-dark.png" alt=""></div></div>
+<div class="shot"><b>Profile and applications: master data links, list, filters</b><div class="pair"><img src="screens/10-profile-light.png" alt=""><img src="screens/10-profile-dark.png" alt=""></div></div>
+<div class="shot"><b>Application detail: files, gaps, rounds, one-click status</b><div class="pair"><img src="screens/11-detail-light.png" alt=""><img src="screens/11-detail-dark.png" alt=""></div></div>
+<div class="shot"><b>Settings: threshold, theme, helper, what the extension holds</b><div class="pair"><img src="screens/12-settings-light.png" alt=""><img src="screens/12-settings-dark.png" alt=""></div></div>
+</div>
+</body></html>

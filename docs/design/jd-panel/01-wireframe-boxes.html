@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JD Fit side panel: wireframe 1, boxes</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px; background: #f3f3f1; color: #333; font: 13px/1.4 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 20px; color: #666; max-width: 760px; }
+  .stage { display: flex; gap: 0; width: 1100px; border: 2px solid #555; background: #fff; }
+  .page { flex: 1; padding: 18px; border-right: 2px solid #555; }
+  .panel { width: 400px; padding: 14px; background: #fafafa; display: flex; flex-direction: column; gap: 10px; }
+  .box { border: 2px dashed #888; background: #fff; padding: 8px 10px; color: #555; }
+  .box.solid { border-style: solid; border-color: #555; }
+  .box.hi { background: #e4e4e0; border-style: solid; border-color: #222; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .lbl { font-weight: 700; color: #222; }
+  .small { font-size: 11px; color: #777; }
+  .tall { min-height: 70px; } .tall2 { min-height: 110px; }
+  .n { display: inline-block; min-width: 18px; height: 18px; line-height: 18px; text-align: center; border: 1.5px solid #222; border-radius: 50%; font-size: 11px; font-weight: 700; margin-right: 6px; background: #fff; }
+  .btn { border: 2px solid #222; padding: 6px; text-align: center; font-weight: 700; }
+  .cmd { display: flex; gap: 8px; align-items: stretch; }
+  .cmd .code { flex: 1; border: 2px dashed #888; padding: 6px 8px; min-height: 40px; color: #777; }
+  .cmd .copy { width: 64px; border: 2px solid #222; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .legend { width: 1100px; margin-top: 18px; columns: 2; column-gap: 28px; }
+  .legend div { margin-bottom: 4px; break-inside: avoid; }
+</style>
+</head>
+<body>
+<h1>JD Fit side panel: wireframe 1 (boxes only)</h1>
+<p class="sub">Layout and hierarchy only. No real content, colour or type. Right: the Chrome side panel (about 400 px wide, scrolls). Left: whatever job page is open. Solid dark outline = something you press. Grey fill = the two things you read first: salary and score.</p>
+
+<div class="stage">
+  <div class="page">
+    <div class="box tall" style="margin-bottom:12px">Job page in the browser (any careers site or LinkedIn)</div>
+    <div class="box tall2" style="margin-bottom:12px">JD text</div>
+    <div class="btn" style="width:160px">Apply (the site's own button)</div>
+  </div>
+
+  <div class="panel">
+    <div class="box solid row" style="align-items:center"><span><span class="n">1</span>Panel title</span><span style="flex:0 0 auto" class="small">profile chip</span><span style="flex:0 0 28px" class="btn">gear</span></div>
+
+    <div class="box"><span class="n">2</span>Company / role / location / source<div class="small">one block, 3 short lines</div></div>
+
+    <div class="row">
+      <div class="box hi tall"><span class="n">3</span><span class="lbl">SCORE</span><div class="small">big number, must / nice counts</div></div>
+      <div class="box hi tall"><span class="n">4</span><span class="lbl">SALARY</span><div class="small">offered band as written on the page</div></div>
+    </div>
+
+    <div class="box"><span class="n">5</span>Threshold bar<div class="small">your marker on a 0 to 100 track</div></div>
+
+    <div class="box"><span class="n">6</span>Flags<div class="small">India / remote, posting age, scam signals (only if present)</div></div>
+
+    <div class="box tall2"><span class="n">7</span>Evidence<div class="small">tabs: matched | missing | unconfirmed (chips)</div></div>
+
+    <div class="box solid"><div class="lbl" style="margin-bottom:8px"><span class="n">8</span>Next steps</div>
+      <div class="btn" style="margin-bottom:8px">0  Save JD</div>
+      <div class="cmd" style="margin-bottom:6px"><div class="code">1  command</div><div class="copy">Copy</div></div>
+      <div class="cmd" style="margin-bottom:6px"><div class="code">2  command</div><div class="copy">Copy</div></div>
+      <div class="cmd" style="margin-bottom:6px"><div class="code">3  command</div><div class="copy">Copy</div></div>
+      <div class="cmd"><div class="code">Not for me</div><div class="copy">Copy</div></div>
+    </div>
+
+    <div class="row"><div class="btn">Refresh</div><div class="btn">Settings</div></div>
+  </div>
+</div>
+
+<div class="legend">
+  <div><span class="n">1</span>Header, profile freshness, settings</div>
+  <div><span class="n">2</span>What page this is</div>
+  <div><span class="n">3</span>Quick fit score</div>
+  <div><span class="n">4</span>Offered salary, highlighted</div>
+  <div><span class="n">5</span>Threshold you set</div>
+  <div><span class="n">6</span>Warnings and facts about the posting</div>
+  <div><span class="n">7</span>Why the score is what it is</div>
+  <div><span class="n">8</span>Save the JD, then copyable terminal commands</div>
+</div>
+</body>
+</html>

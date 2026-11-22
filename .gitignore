@@ -1,0 +1,23 @@
+.DS_Store
+__pycache__/
+node_modules/
+
+# your own data lives in your clone and never goes into git
+master/master-resume.md
+master/preferences.json
+applications/*.md
+applications/.history/
+tailored/*
+!tailored/_base/
+job-inbox/
+stories/
+answers/
+prep/
+views/
+dist/
+.trash/
+tools/jd-capture-extension/data/*.json
+tools/jobd/jobs/
+tools/jobd/jobd.config.json
+tools/jobd/*.log
+tools/jobd/jobd-launcher.sh

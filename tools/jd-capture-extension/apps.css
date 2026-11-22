@@ -1,0 +1,68 @@
+/* Applications: the dedicated full-page view (IA doc section 5). Reuses the tokens and components of panel.css. */
+#app.wide { max-width: 75rem; margin: 0 auto; padding: var(--s5) var(--s5) var(--s6); gap: var(--s4); }
+.apps-head { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.apps-head h1 { margin: 0; font-size: 1.5rem; letter-spacing: -.02em; }
+.dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); gap: var(--s3); }
+.dash button { text-align: left; padding: var(--s3) var(--s4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--card); cursor: pointer; box-shadow: var(--shadow); }
+.dash button b { display: block; font-size: 1.75rem; line-height: 1.1; letter-spacing: -.02em; }
+.dash button span { font-size: var(--fs-sm); color: var(--text-2); }
+.dash button[aria-pressed="true"] { background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box; border: 1px solid transparent; }
+.toolbar { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.toolbar .filters { margin: 0; flex: 1; }
+.toolbar select, .toolbar input[type="search"] { padding: var(--s2) var(--s3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); }
+.toolbar input[type="search"] { min-width: 12rem; }
+.apps-grid { display: grid; grid-template-columns: minmax(18rem, 25rem) 1fr; gap: var(--s4); align-items: start; }
+.applist { display: flex; flex-direction: column; gap: var(--s2); }
+.appcard { text-align: left; width: 100%; padding: var(--s3) var(--s4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--card); cursor: pointer; box-shadow: var(--shadow); }
+.appcard:hover { border-color: color-mix(in srgb, var(--grad-a) 60%, transparent); }
+.appcard[aria-current="true"] { background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box; border: 1px solid transparent; }
+.appcard .co { font-weight: 700; }
+.appcard .ti { color: var(--text-2); font-size: var(--fs-md); margin: 2px 0 var(--s2); }
+.appcard .meta { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); font-size: var(--fs-xs); color: var(--text-3); }
+.score-chip { font-weight: 700; font-size: var(--fs-sm); padding: 0 var(--s2); border-radius: var(--r-pill); background: var(--chip); }
+.detail { display: flex; flex-direction: column; gap: var(--s3); position: sticky; top: var(--s4); }
+.detail .back { display: none; }
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li { position: relative; padding: 0 0 var(--s3) var(--s5); border-left: 2px solid var(--border); margin-left: .375rem; }
+.timeline li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.timeline li::before { content: ""; position: absolute; left: -.4375rem; top: .25rem; width: .75rem; height: .75rem; border-radius: 50%; background: var(--grad); }
+.timeline .when { font-size: var(--fs-xs); color: var(--text-3); }
+.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-md); }
+.tbl th, .tbl td { text-align: left; padding: var(--s2) var(--s2); border-top: 1px solid var(--border); vertical-align: top; }
+.tbl th { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); border-top: 0; }
+.formgrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin-top: var(--s3); }
+.formgrid .wide2 { grid-column: 1 / -1; }
+.empty-state { text-align: center; padding: var(--s6) var(--s4); color: var(--text-2); }
+@media (max-width: 56rem) {
+  .apps-grid { grid-template-columns: 1fr; }
+  .detail { position: static; }
+  .apps-grid.has-selection .applist { display: none; }
+  .apps-grid:not(.has-selection) .detail { display: none; }
+  .detail .back { display: inline-flex; }
+  .formgrid { grid-template-columns: 1fr; }
+}
+
+/* table cells: keep words whole */
+.tbl th, .tbl td { overflow-wrap: normal; word-break: normal; }
+.tbl th { white-space: nowrap; }
+.tbl td:first-child { white-space: nowrap; }
+
+/* Danger zone and the delete confirmation. Everything destructive uses --bad, so it always reads as red, in light and dark. */
+.danger-card { border-color: color-mix(in srgb, var(--bad) 55%, transparent); background: color-mix(in srgb, var(--bad) 7%, var(--card)); }
+.danger-card .card-title, .danger-card .card-title .ic { color: var(--bad); }
+.danger-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); flex-wrap: wrap; }
+.danger-row > div { flex: 1 1 14rem; min-width: 0; }
+.btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 60%, transparent); background: transparent; }
+.btn.danger:hover { background: color-mix(in srgb, var(--bad) 14%, transparent); }
+.btn.danger.solid { background: #c62f45; border-color: #c62f45; color: #fff; }
+.btn.danger.solid:hover { background: #ad2438; }
+.btn.danger:disabled, .btn.danger.solid:disabled { opacity: .5; cursor: not-allowed; }
+.scrim { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: var(--s4); background: rgba(20, 12, 16, .55); }
+.modal { width: min(32rem, 100%); max-height: calc(100vh - 2rem); overflow: auto; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--s5); box-shadow: 0 20px 60px rgba(0, 0, 0, .35); }
+.modal.danger { border: 2px solid var(--bad); }
+.modal-head { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s3); }
+.modal-head h2 { margin: 0; font-size: var(--fs-lg, 1.1rem); }
+.modal-head .ic { color: var(--bad); }
+.del-list { margin: var(--s3) 0; padding: var(--s3) var(--s4); list-style: none; display: grid; gap: var(--s3); background: color-mix(in srgb, var(--bad) 8%, var(--card-2)); border-radius: var(--r-md); border: 1px solid color-mix(in srgb, var(--bad) 25%, transparent); }
+.del-list .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .75rem; word-break: break-all; }
+.modal-actions { display: flex; justify-content: flex-end; gap: var(--s3); margin-top: var(--s4); flex-wrap: wrap; }
