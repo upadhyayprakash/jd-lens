@@ -36,6 +36,25 @@ class FreshDownloadTest(unittest.TestCase):
         for text in ("Load unpacked", "replace the sample data", "docs/GETTING-STARTED.md"):
             self.assertIn(text, r.stdout)
 
+    def test_setup_with_a_data_folder_keeps_the_data_there_and_the_doctor_agrees(self):
+        data = self.tmp.parent / (self.tmp.name + "-my data")
+        self.addCleanup(shutil.rmtree, data, ignore_errors=True)
+        r = self.py("setup.py", "--manifest-dir", str(self.mdir), "--data-dir", str(data))
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((data / "master" / "master-resume.md").exists(), "the sample master goes into the data folder")
+        self.assertFalse((self.tmp / "master" / "master-resume.md").exists(), "and not into the engine folder")
+        self.assertTrue((data / "applications").is_dir() and (data / "tailored").is_dir())
+        prof = json.loads((self.tmp / "tools" / "jd-capture-extension" / "data" / "profile.json").read_text())
+        self.assertEqual(prof["repo_path"], str(data))
+        code, res = self.doctor()
+        self.assertEqual(res["Data folder"]["level"], "ok", res)
+        self.assertNotEqual(res["Master resume"]["level"], "fail", res)
+
+    def test_setup_rejects_a_data_folder_without_a_path(self):
+        r = self.py("setup.py", "--manifest-dir", str(self.mdir), "--data-dir", "relative/folder")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("full path", r.stdout)
+
     def test_setup_never_overwrites_your_master_resume(self):
         self.py("setup.py", "--no-helper")
         m = self.tmp / "master" / "master-resume.md"

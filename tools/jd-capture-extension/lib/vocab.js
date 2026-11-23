@@ -73,7 +73,7 @@
     // AI
     S('LLM', ['LLM', 'LLMs', 'large language model', 'large language models']),
     S('Claude API', ['Claude API', 'Claude Code', 'Anthropic API', 'Claude']),
-    S('Initech API', ['Initech API', 'Initech']),
+    S('OpenAI API', ['OpenAI API', 'OpenAI']),
     S('Langfuse', ['Langfuse']),
     S('RAG', [], { cs: ['RAG'] }), S('MCP', [], { cs: ['MCP'] }),
     S('agents', ['AI agents', 'agentic', 'multi-agent', 'agent frameworks']),

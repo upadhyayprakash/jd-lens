@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anika Verma Resume</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap">
+<style>
+/* Layout: photo. A beige sidebar with a round photo, name and summary on the right, two A4 sheets.
+   The photo is a generic avatar. To use your own, put the file at master/photo.jpg (it stays on your computer, git-ignored)
+   and change the img src below to its path from the folder this file is copied to (for example ../../master/photo.jpg). */
+:root { --desk:#E7E7E5; --paper:#FFFFFF; --side:#ECE7DF; --ink:#26241F; --ink-2:#55514A; --ink-3:#7A756C; --rule:#D5CFC4; --accent:#8A6F4E; --font:'Open Sans',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--desk); color:var(--ink); font-family:var(--font); font-size:10pt; line-height:1.45; -webkit-font-smoothing:antialiased; padding:32px 16px 48px; }
+.sheet { width:100%; max-width:210mm; min-height:297mm; margin:0 auto 24px; background:linear-gradient(to right, var(--side) 0 60mm, var(--paper) 60mm); box-shadow:0 1px 2px rgba(0,0,0,.06),0 12px 32px rgba(0,0,0,.08);
+  display:grid; grid-template-columns:60mm minmax(0,1fr); align-content:start; }
+aside { padding:12mm 7mm 10mm; display:flex; flex-direction:column; gap:6mm; min-width:0; }
+main { padding:13mm 11mm 10mm 10mm; display:flex; flex-direction:column; gap:5.5mm; min-width:0; }
+.photo { width:38mm; height:38mm; border-radius:50%; overflow:hidden; margin:0 auto 1mm; background:#C9C2B6; box-shadow:0 0 0 1.2mm rgba(255,255,255,.7); }
+.photo img { width:100%; height:100%; object-fit:cover; display:block; }
+h1 { margin:0; font-size:27pt; font-weight:700; letter-spacing:-0.02em; line-height:1.05; }
+.role { margin:2mm 0 0; font-size:11.5pt; color:var(--accent); font-weight:600; letter-spacing:.01em; }
+h2 { margin:0 0 2.5mm; font-size:8.8pt; font-weight:700; letter-spacing:.14em; text-transform:uppercase; padding-bottom:1.6mm; border-bottom:1px solid var(--rule); }
+aside h2 { border-bottom-color:rgba(0,0,0,.16); }
+.kv { margin:0; display:grid; gap:2.6mm; }
+.kv dt { font-size:7.6pt; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+.kv dd { margin:0; font-size:9pt; overflow-wrap:anywhere; }
+a { color:inherit; text-decoration:none; }
+.list { margin:0; padding:0; list-style:none; display:grid; gap:1.6mm; font-size:9pt; }
+.list small { display:block; color:var(--ink-3); font-size:8pt; }
+.skillgroup { margin-bottom:2.6mm; } .skillgroup h3 { margin:0 0 .8mm; font-size:8.8pt; font-weight:700; }
+.skillgroup p { margin:0; font-size:8.8pt; color:var(--ink-2); }
+.about { margin:0; font-size:9.6pt; color:var(--ink-2); line-height:1.5; }
+.job { display:grid; gap:0; padding-bottom:3.4mm; } .job + .job { border-top:1px solid var(--rule); padding-top:3.4mm; }
+.when { margin:0 0 .6mm; font-size:8pt; font-weight:600; color:var(--ink-3); letter-spacing:.02em; }
+.job h3 { margin:0; font-size:10.6pt; font-weight:700; }
+.org { margin:.4mm 0 1.6mm; font-size:9.2pt; font-style:italic; color:var(--accent); }
+.job ul { margin:0; padding-left:4.2mm; display:grid; gap:.9mm; } .job li { font-size:9.1pt; line-height:1.42; } .lead { font-weight:600; }
+.note { max-width:210mm; margin:0 auto; font-size:9pt; color:var(--ink-3); text-align:center; }
+@media print { @page { size:A4; margin:0; } body { background:none; padding:0; } .sheet { box-shadow:none; margin:0; break-after:page; } .sheet:last-of-type { break-after:auto; } .note { display:none; } }
+</style>
+</head>
+<body>
+<article class="sheet" aria-label="Resume, page 1">
+<aside aria-label="Photo, contact, education and skills">
+<div class="photo"><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23C9C2B6'/%3E%3Ccircle cx='50' cy='38' r='17' fill='%23F3EFE8'/%3E%3Cpath d='M16 100c2-24 17-36 34-36s32 12 34 36z' fill='%23F3EFE8'/%3E%3C/svg%3E" alt="Profile photo (sample avatar)"></div>
+<section><h2>Contact</h2><dl class="kv">
+<div><dt>Location</dt><dd>Remote (US time zones)</dd></div>
+<div><dt>Phone</dt><dd>+1 (555) 010-0142</dd></div>
+<div><dt>Email</dt><dd><a href="mailto:anika.verma@example.com">anika.verma@example.com</a></dd></div>
+<div><dt>Portfolio</dt><dd>anikaverma.example.com</dd></div>
+<div><dt>LinkedIn</dt><dd>/in/example-anika-verma</dd></div>
+<div><dt>GitHub</dt><dd>github.com/example-anika-verma</dd></div>
+</dl></section>
+<section><h2>Education</h2><ul class="list"><li>B.E. Computer Science<small>Hillcrest Institute of Technology, 2010 to 2014</small></li></ul></section>
+<section><h2>Skills</h2>
+<div class="skillgroup"><h3>Frontend</h3><p>React, TypeScript, Next.js, Jest</p></div>
+<div class="skillgroup"><h3>Backend</h3><p>Node.js, NestJS, REST APIs, Kafka</p></div>
+<div class="skillgroup"><h3>Data</h3><p>PostgreSQL, Redis, MySQL</p></div>
+<div class="skillgroup"><h3>Infra &amp; delivery</h3><p>AWS, Docker, GitHub Actions</p></div>
+</section>
+<section><h2>Languages</h2><ul class="list"><li>English<small>Fluent</small></li><li>Hindi<small>Native</small></li></ul></section>
+</aside>
+<main>
+<header><h1>Anika Verma</h1><p class="role">Senior Software Engineer · TypeScript, React, Node.js</p></header>
+<section><h2>About me</h2><p class="about">Software engineer with 10+ years building payments and checkout products with TypeScript, React and Node.js. Cut checkout latency by 62% at Northwind Labs and built the feature-flag service that now runs on 40 product teams.</p></section>
+<section><h2>Work experience</h2>
+<div class="job">
+<p class="when">Jan 2021 to now</p>
+<h3>Senior Software Engineer</h3>
+<p class="org">Northwind Labs · Remote</p>
+<ul>
+<li>Led the checkout rebuild in <span class="lead">React and TypeScript</span>, cutting p95 latency from 420 ms to 160 ms (62%) across web and mobile web.</li>
+<li>Built <span class="lead">Relay</span>, an internal feature-flag service on Node.js and Redis, now used by 40 product teams with zero-downtime rollouts.</li>
+<li>Designed the PostgreSQL schema for the billing service, with role-based views for finance dashboards.</li>
+</ul>
+</div>
+</section>
+</main>
+</article>
+
+<article class="sheet" aria-label="Resume, page 2">
+<aside aria-label="Certifications and recognition">
+<section><h2>Certifications</h2><ul class="list"><li>AWS Certified Developer, Associate</li></ul></section>
+<section><h2>Recognition</h2><ul class="list"><li>Winner, Northwind Labs hackathon<small>2024, smart refunds prototype</small></li></ul></section>
+</aside>
+<main>
+<section><h2>Work experience, continued</h2>
+<div class="job">
+<p class="when">Jul 2014 to Dec 2020</p>
+<h3>Software Engineer</h3>
+<p class="org">Brightwave Systems · Pune</p>
+<ul>
+<li>Built the order-events pipeline on <span class="lead">Kafka and Node.js</span>, processing 2M events a day.</li>
+<li>Created the internal admin dashboard (React, Express, MySQL) used by 200 support staff, cutting ticket handling time by 25%.</li>
+</ul>
+</div>
+</section>
+</main>
+</article>
+
+<p class="note">Sample layout with made-up content. Replace the photo, the contact block and the text with your own, keeping the structure.</p>
+</body>
+</html>

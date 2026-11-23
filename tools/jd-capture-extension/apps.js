@@ -12,7 +12,13 @@
   let toastTimer = null;
 
   const toast = (m) => { state.toast = m; render(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { state.toast = ''; render(); }, 2400); };
-  const cmd = (inner) => `cd "${state.repo || '/path/to/jd-lens'}" && ${inner}`;
+  // Terminal fallbacks: with your data folder apart from the engine, run in the data folder and point Claude and the tools at the engine.
+  const cmd = (inner) => {
+    const dataDir = state.repo || '/path/to/jd-lens', engine = (state.helper && state.helper.ok && state.helper.engine) || '';
+    let c = inner;
+    if (engine && dataDir && engine !== dataDir) c = c.replace(/\btools\/([\w./-]+)/g, (m, f) => `"${engine}/tools/${f}"`).replace(/\bclaude "/g, `claude --add-dir "${engine}" "`);
+    return `cd "${dataDir}" && ${c}`;
+  };
   async function copy(t) { await J.copyText(t); toast('Copied. Paste it in a terminal.'); }
   async function openFile(p) { if (!(await J.openFile(p))) toast('Could not open it from here. Path copied.'); }
 

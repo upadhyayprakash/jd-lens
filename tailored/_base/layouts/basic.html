@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Anika Verma, Resume</title>
+<!-- Layout: basic (one column). Sample layout with made-up content. Replace the content with your own and keep the structure and the @page rules:
+     /job build copies this file, applies the approved edits and prints it to a 2-page A4 PDF. -->
+<style>
+  @page { size: A4; margin: 14mm 16mm; }
+  * { box-sizing: border-box; }
+  body { font: 10pt/1.38 -apple-system, "Helvetica Neue", Arial, sans-serif; color: #1b1b1f; margin: 0; }
+  h1 { font-size: 20pt; margin: 0; letter-spacing: -.01em; }
+  .headline { color: #555; margin: 1mm 0 2mm; }
+  .contact { font-size: 9pt; color: #444; }
+  h2 { font-size: 9.5pt; text-transform: uppercase; letter-spacing: .08em; border-bottom: .3mm solid #ccc; padding-bottom: 1mm; margin: 6mm 0 2.5mm; }
+  .job { margin-bottom: 4mm; break-inside: avoid; }
+  .job-head { display: flex; justify-content: space-between; gap: 6mm; font-weight: 600; }
+  .job-head span:last-child { font-weight: 400; color: #555; white-space: nowrap; }
+  ul { margin: 1.5mm 0 0; padding-left: 4.5mm; } li { margin-bottom: 1mm; }
+  .skills { display: grid; grid-template-columns: 24mm 1fr; gap: 1mm 3mm; }
+  .skills b { font-weight: 600; }
+</style></head><body>
+<h1>Anika Verma</h1>
+<div class="headline">Senior Software Engineer, TypeScript, React, Node.js</div>
+<div class="contact">Remote (US time zones) | +1 (555) 010-0142 | anika.verma@example.com | anikaverma.example.com | github.com/example-anika-verma</div>
+
+<h2>Summary</h2>
+<p>Software engineer with 10+ years building payments and checkout products with TypeScript, React and Node.js. Cut checkout latency by 62% at Northwind Labs and built the feature-flag service that now runs on 40 product teams.</p>
+
+<h2>Skills</h2>
+<div class="skills">
+  <b>Frontend</b><span>React, TypeScript, Next.js, Jest</span>
+  <b>Backend</b><span>Node.js, NestJS, REST APIs, Kafka</span>
+  <b>Data</b><span>PostgreSQL, Redis, MySQL</span>
+  <b>Infra &amp; delivery</b><span>AWS, Docker, GitHub Actions</span>
+</div>
+
+<h2>Experience</h2>
+<div class="job"><div class="job-head"><span>Northwind Labs, Senior Software Engineer</span><span>Jan 2021 to now, Remote</span></div>
+<ul>
+  <li>Led the checkout rebuild in <span class="lead">React and TypeScript</span>, cutting p95 latency from 420 ms to 160 ms (62%) across web and mobile web.</li>
+  <li>Built <span class="lead">Relay</span>, an internal feature-flag service on Node.js and Redis, now used by 40 product teams with zero-downtime rollouts.</li>
+  <li>Designed the PostgreSQL schema for the billing service, with role-based views for finance dashboards.</li>
+</ul></div>
+<div class="job"><div class="job-head"><span>Brightwave Systems, Software Engineer</span><span>Jul 2014 to Dec 2020, Pune</span></div>
+<ul>
+  <li>Built the order-events pipeline on <span class="lead">Kafka and Node.js</span>, processing 2M events a day.</li>
+  <li>Created the internal admin dashboard (React, Express, MySQL) used by 200 support staff, cutting ticket handling time by 25%.</li>
+</ul></div>
+
+<h2>Education and recognition</h2>
+<p>B.E. Computer Science, Hillcrest Institute of Technology, 2010 to 2014<br>AWS Certified Developer, Associate<br>Winner, Northwind Labs hackathon, 2024, smart refunds prototype</p>
+</body></html>

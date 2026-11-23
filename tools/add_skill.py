@@ -16,7 +16,9 @@ A skill with no evidence is refused on purpose: the score is only as honest as t
 import argparse, datetime, pathlib, re, shutil, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-MASTER = ROOT / "master" / "master-resume.md"
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths  # noqa: E402  (where the data folder is)
+MASTER = paths.DATA / "master" / "master-resume.md"
 RANK = {"none": 0, "earlier": 1, "partial": 2, "listed": 3, "user-confirmed": 3}
 
 

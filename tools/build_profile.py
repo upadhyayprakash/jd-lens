@@ -17,8 +17,10 @@ Usage (repo root):  python3 tools/build_profile.py [--show] [--check]
 import datetime, hashlib, json, pathlib, re, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-MASTER = ROOT / "master" / "master-resume.md"
-DATA = ROOT / "tools" / "jd-capture-extension" / "data"
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths  # noqa: E402  (where the data folder is)
+MASTER = paths.DATA / "master" / "master-resume.md"
+CACHE = ROOT / "tools" / "jd-capture-extension" / "data"      # the generated files the extension reads (they stay with the extension)
 LEVELS = {"listed", "user-confirmed", "partial", "earlier", "none"}
 MONTHS = {m: i + 1 for i, m in enumerate("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split())}
 # Domain words the scorer may match JD text against. A word is included only if it appears in the master file.
@@ -168,7 +170,7 @@ def build():
         "schema": 1,
         "generated_at": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
         "master_sha256": sha(text),
-        "repo_path": str(ROOT),
+        "repo_path": str(paths.DATA),
         "career_start": career_start(text),
         "domains": domain_words(text),
         "rows": rows,
@@ -178,17 +180,17 @@ def build():
 
 
 def main():
-    DATA.mkdir(parents=True, exist_ok=True)
-    pf = DATA / "profile.json"
+    CACHE.mkdir(parents=True, exist_ok=True)
+    pf = CACHE / "profile.json"
     if "--check" in sys.argv:
         ok = pf.exists() and json.loads(pf.read_text()).get("master_sha256") == sha(master_text())
         print("profile is current" if ok else "profile is STALE (run tools/build_profile.py)")
         sys.exit(0 if ok else 1)
     prof = build()
     pf.write_text(json.dumps(prof, indent=2, ensure_ascii=False) + "\n")
-    (DATA / "resume.json").write_text(json.dumps(resume_data(master_text()), indent=2, ensure_ascii=False) + "\n")
+    (CACHE / "resume.json").write_text(json.dumps(resume_data(master_text()), indent=2, ensure_ascii=False) + "\n")
     apps = {"schema": 1, "generated_at": prof["generated_at"], "applications": applications()}
-    (DATA / "applications.json").write_text(json.dumps(apps, indent=2, ensure_ascii=False) + "\n")
+    (CACHE / "applications.json").write_text(json.dumps(apps, indent=2, ensure_ascii=False) + "\n")
     print(f"profile.json: {len(prof['rows'])} skill rows, career start {prof['career_start']}, {len(prof['domains'])} domain words")
     print(f"applications.json: {len(apps['applications'])} applications")
     print("resume.json: written")

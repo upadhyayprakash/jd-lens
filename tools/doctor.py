@@ -80,7 +80,11 @@ def main():
             "Install from claude.com/claude-code, then run `claude` once and sign in")
 
     # --- your data
-    master = ROOT / "master" / "master-resume.md"
+    sys.path.insert(0, str(ROOT / "tools"))
+    import paths  # noqa: E402
+    master = paths.DATA / "master" / "master-resume.md"
+    if paths.DATA != ROOT:
+        add("ok", "Data folder", f"{paths.DATA} (set by {paths.source()})", "")
     if not master.exists():
         add("fail", "Master resume", "master/master-resume.md does not exist", "python3 tools/setup.py   (creates it from the template)")
     else:

@@ -48,6 +48,7 @@ June 03, 2026`;
                  source_title: 'Senior Full Stack Engineer - EMEA - Careers at Northwind', extraction: 'main-text', company: 'Northwind', company_url: 'https://www.northwind.example',
                  role: params.has('longtitle') ? 'Senior Staff Software Engineer, Distributed Identity Platform and Developer Experience (Remote, EMEA and India)' : 'Senior Full Stack Engineer - EMEA', location_text: 'India, Pakistan, Philippines +20 more', salary_text: null, posted: '2026-06-03', jd_text: JD };
 
+  const PHOTO_PREVIEW = 'data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23C9C2B6%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2717%27 fill=%27%23F3EFE8%27/%3E%3Cpath d=%27M16 100c2-24 17-36 34-36s32 12 34 36z%27 fill=%27%23F3EFE8%27/%3E%3C/svg%3E';
   const profile = {
     schema: 1, generated_at: '2026-11-21T20:14:00+05:30', master_modified: '2026-11-22T00:20:00+05:30', master_sha256: 'mock', repo_path: '/Users/example/jd-lens', career_start: '2014-07',
     domains: ['SaaS', 'payments', 'fintech', 'real-time'], stats: { skill_rows: 25, evidence_entries: 14 },
@@ -60,6 +61,7 @@ June 03, 2026`;
       ['Docker', 'listed', ['F-SAP-02']], ['Kubernetes', 'partial', ['F-CE-01']], ['GitHub Actions, GitLab CI', 'listed', ['F-PY-03']], ['Java, Go, Spring Boot', 'earlier', ['F-SAP-03']],
     ].map(([skills, level, evidence]) => ({ skills, level, evidence })),
   };
+  if (params.get('datafolder') === 'separate') profile.repo_path = '/Users/example/My Resume Data';     // your data folder is apart from the engine
 
   const F = (id, status, text, needs) => ({ id, status, text, needs_confirm: !!needs });
   const resume = {
@@ -142,9 +144,22 @@ June 03, 2026`;
       if (st === 'nohelper') return { ok: false, helper_missing: true, error: 'Specified native messaging host not found.' };
       switch (op) {
         case 'resume_info': return { ok: true, found: true, pages: params.get('pdfpages') ? Number(params.get('pdfpages')) : 2, bytes: 86000 };
-        case 'get_prefs': return { ok: true, prefs: { resume_pages: params.get('pages') === 'any' ? 'any' : Number(params.get('pages')) || 2 } };
-        case 'set_pref': return { ok: true, prefs: { resume_pages: a.value === 'any' ? 'any' : Number(a.value) } };
-        case 'ping': return { ok: true, version: '1.0.0', repo: profile.repo_path, claude: '/Users/example/.local/bin/claude', node: '/usr/local/bin/node' };
+        case 'get_prefs': return { ok: true, prefs: { resume_pages: params.get('pages') === 'any' ? 'any' : Number(params.get('pages')) || 2, resume_layout: params.get('layout') || 'two-column' } };
+        case 'set_pref': return { ok: true, prefs: a.key === 'resume_layout' ? { resume_pages: 2, resume_layout: a.value } : { resume_pages: a.value === 'any' ? 'any' : Number(a.value), resume_layout: 'two-column' } };
+        case 'ping': {
+          const sep = params.get('datafolder') === 'separate', data = sep ? '/Users/example/My Resume Data' : profile.repo_path;
+          return { ok: true, version: '1.0.0', repo: data, engine: '/Users/example/jd-lens', data, data_source: sep ? 'config' : 'engine', has_master: params.get('nomaster') ? false : true,
+                   claude: '/Users/example/.local/bin/claude', node: '/usr/local/bin/node' };
+        }
+        case 'photo_info': return { ok: true, has_photo: params.has('photo'), path: '/Users/example/My Resume Data/master/photo.jpg', preview: params.has('photo') ? PHOTO_PREVIEW : undefined };
+        case 'choose_photo': return { ok: true, path: '/Users/example/Pictures/me.jpg' };
+        case 'set_photo': return { ok: true, has_photo: true, path: '/Users/example/My Resume Data/master/photo.jpg', preview: PHOTO_PREVIEW };
+        case 'remove_photo': return { ok: true, has_photo: false };
+        case 'open_folder': return a.which === 'data' || a.which === 'engine' ? { ok: true, opened: '/Users/example/My Resume Data' } : { ok: false, error: "which must be 'data' or 'engine'" };
+        case 'data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: '/Users/example/My Resume Data', source: 'config', separate: true, has_master: true };
+        case 'choose_data_dir': return { ok: true, path: '/Users/example/My Resume Data' };
+        case 'set_data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: a.path, source: 'config', separate: true, has_master: true, sample_added: !!a.sample, profile_rebuilt: true };
+        case 'clear_data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: '/Users/example/jd-lens', source: 'engine', separate: false, has_master: true, profile_rebuilt: false };
         case 'profile_status': return { ok: true, current: st !== 'stale' };
         case 'list': return { ok: true, applications: saved };
         case 'show': { const x = saved.find((s) => s.slug === a.slug) || saved[0]; return { ok: true, application: Object.assign({}, x, { rounds: ROUNDS[x.slug] || [], history: HIST[x.slug] || [['' + x.added, '-', x.status, 'Added']],

@@ -5,7 +5,7 @@ description: "Job application pipeline for the user. Takes a JD link or pasted J
 trigger: /job
 metadata:
   requires: "Google Chrome (the claude-in-chrome MCP tools for reading JD pages, headless Chrome for PDF), poppler (pdfinfo, pdftotext, pdftoppm), python3"
-  context: "master/master-resume.md (facts with IDs), tailored/_base/resume-base.html (layout), applications/ (one file per JD), master/preferences.json (user settings such as resume_pages, via tools/prefs.py), tools/ (render_pdf.sh, check_resume.py, jobs_table.py)"
+  context: "master/master-resume.md (facts with IDs), tailored/_base/layouts/ (the chosen layout), the contact block in master section 1, applications/ (one file per JD), master/preferences.json (user settings such as resume_pages, via tools/prefs.py), tools/ (render_pdf.sh, check_resume.py, jobs_table.py)"
 ---
 
 # /job: from a JD to an applied-for, tailored resume
@@ -22,6 +22,10 @@ metadata:
 
 No mode given: a shared JD means `add`, then `score`. "I applied" means `status ... applied`.
 
+## Where the files and the tools are
+
+Your working folder is the user's **data folder**: `master/`, `applications/`, `tailored/`, `views/` and `job-inbox/` are in it, and every path below is relative to it. The commands are written `python3 tools/<name>`: `tools/` is the **engine's** tools folder. When the run's prompt gives an absolute engine path, use it in place of `tools/` (for example `python3 /path/to/jd-lens/tools/jobs.py`), exactly as written. With no such path the data folder and the engine are the same folder, so `tools/` is right as written. Layouts are chosen with `python3 tools/prefs.py get resume_layout` (see the build step).
+
 ## Files
 
 | Path | Holds |
@@ -29,7 +33,7 @@ No mode given: a shared JD means `add`, then `score`. "I applied" means `status 
 | `master/master-resume.md` | Every fact with an ID (`F-...`), skills with evidence, open confirmations. The only source for resume claims. |
 | `applications/<company>-<yyyy-mm>.md` | One file per JD: frontmatter, fit score, gaps, JD text, questions, rounds. Same layout as the interview skill. |
 | `applications/INDEX.md` | Generated table, sorted by fit score. Do not edit by hand. |
-| `tailored/_base/resume-base.html` | Layout for a tailored resume (two A4 sheets, same look as your base layout). Confidential entries are not in it. |
+| `tailored/_base/layouts/<layout>.html` | The layouts a tailored resume can start from: `basic` (one column), `two-column` (sidebar and main) and `photo` (sidebar with a round photo), each two A4 sheets. The user picks one in the panel's Settings (`python3 tools/prefs.py layout` prints the file to use; a file of the same name in the data folder's `tailored/_base/layouts/` replaces the shipped one). Confidential entries are not in them. |
 | `tailored/<company>-<yyyy-mm>/` | The built HTML and PDF for that application. |
 | `tools/` | `render_pdf.sh`, `check_resume.py`, `jobs_table.py`. Use them, do not retype their logic. |
 
@@ -100,10 +104,11 @@ Wait for the user's approval. He may approve all, some, or change wording.
 
 ## Mode: build
 
-1. Copy `tailored/_base/resume-base.html` to `tailored/<company>-<yyyy-mm>/alex_morgan_resume_<company>.html` and apply the approved edits. Keep the CSS and structure. Do not run the page through any cloud tool.
+1. Run `python3 tools/prepare_resume.py <company>-<yyyy-mm>`. It copies the chosen layout (set in the panel's Settings; yours in the data folder's `tailored/_base/layouts/` if you have one, otherwise the shipped one) to `tailored/<company>-<yyyy-mm>/<name>_resume_<company>.html`, for example `anika_verma_resume_northwind.html`, replaces every made-up sample contact value with the matching row of master section 1 (leaving out a line whose row is empty, never inventing a value), and links `master/photo.jpg` into the photo layout when there is one. Read the JSON it prints: `sample_values_left` must be empty (fix any by hand with Edit), and if the file already exists it is left alone, so edit it instead (`--force` starts over). Then apply the approved edits to that file with Read and Edit. Keep the CSS and structure. Do not run the page through any cloud tool, and do not use python3 -c, heredocs, cat or sed to read or change it.
+   - **Photo layout.** If `photo_linked` is false because there is no `master/photo.jpg`, the generic avatar stays; tell the user a photo can be chosen in the panel's Settings, Profile photo.
 2. `tools/render_pdf.sh <html>`
 3. `tools/check_resume.py <pdf> --keywords "<from the application file>" --forbid "<confidential terms>"`. It reads the same `resume_pages` setting, so it must show that many pages (any count when the setting is `any`), no em dash, no forbidden term, readable text.
-4. Look at every page: `pdftoppm -r 70 -png <pdf> <scratchpad>/page` then Read the PNGs. Check nothing is clipped, the layout matches your base layout, and the last page is not nearly empty (unless the setting is `any` and the content simply ends).
+4. Look at every page: `pdftoppm -r 70 -png <pdf> <scratchpad>/page` then Read the PNGs. Check nothing is clipped, the layout matches the chosen layout, no sample contact value is left, and the last page is not nearly empty (unless the setting is `any` and the content simply ends).
 5. If it is over the page target, trim in this order (skip when the target is `any`): summary length, skills tags, own-products bullets, older roles' bullets. Never drop dates or titles.
 6. Update the application file: `resume:` path, measured keyword count, what differs from the proposal.
 7. Tell the user the PDF's full path and any wording he should check against his memory.

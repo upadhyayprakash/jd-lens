@@ -240,6 +240,18 @@ details.terminal > summary { cursor: pointer; color: var(--text-3); font-size: v
 textarea, input[type="text"], input[type="date"] { width: 100%; padding: var(--s2) var(--s3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card-2); }
 textarea { min-height: 4.5rem; resize: vertical; }
 label.field { display: block; font-size: var(--fs-sm); color: var(--text-2); margin-bottom: var(--s2); }
+.layout-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.layout-pick button { display: grid; gap: var(--s1); justify-items: center; text-align: center; padding: var(--s2); background: var(--card-2); border: 2px solid var(--border); border-radius: var(--r-md); cursor: pointer; color: inherit; font: inherit; }
+.layout-pick button:disabled { opacity: .55; cursor: not-allowed; }
+.layout-pick button[aria-pressed="true"] { border-color: var(--grad-text-a); background: var(--card); }
+.layout-pick img { width: 100%; height: auto; aspect-ratio: 381 / 538; object-fit: cover; object-position: top; border: 1px solid var(--border); border-radius: var(--r-sm); background: #fff; }
+.layout-pick .layout-name { font-size: var(--fs-md); font-weight: 700; }
+.layout-pick button[aria-pressed="true"] .layout-name { color: var(--grad-text-a); }
+.photo-preview { width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); background: var(--card-2); flex: 0 0 auto; display: grid; place-items: center; color: var(--text-3); }
+.path-open { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s1); width: 100%; }
+.path-open .path-text { overflow-wrap: anywhere; min-width: 0; }
+.folder-btn { min-width: 1.75rem; height: 1.75rem; padding: 0; flex: 0 0 auto; color: var(--text-2); }
+.folder-btn svg { width: 1rem; height: 1rem; }
 .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
 .segmented button { border: 0; background: var(--card); padding: var(--s1) var(--s3); cursor: pointer; font-size: var(--fs-sm); }
 .segmented button[aria-pressed="true"] { background: var(--grad); color: var(--on-grad); font-weight: 700; }

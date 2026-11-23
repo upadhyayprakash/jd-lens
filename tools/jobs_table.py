@@ -6,7 +6,10 @@ Usage: tools/jobs_table.py   (run from the repo root)
 """
 import pathlib, re
 
-root = pathlib.Path(__file__).resolve().parent.parent
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths  # noqa: E402  (where the data folder is)
+root = paths.DATA
 rows = []
 for f in sorted((root / "applications").glob("*.md")):
     if f.name == "INDEX.md":

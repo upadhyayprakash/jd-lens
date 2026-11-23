@@ -17,7 +17,10 @@ Every write first copies the old file to applications/.history/<slug>-<timestamp
 """
 import argparse, datetime, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+CODE = pathlib.Path(__file__).resolve().parent.parent          # the engine
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths  # noqa: E402  (where the data folder is)
+ROOT = paths.DATA                                               # your data folder (the same folder unless you set one)
 APPS = ROOT / "applications"
 HISTORY = APPS / ".history"
 STATUSES = ["considering", "applied", "screening", "interviewing", "offer", "rejected", "withdrawn"]
@@ -88,7 +91,7 @@ def set_fm_key(block, key, value):
 def refresh_views():
     """Regenerate INDEX.md and the HTML views (no PDF, no Chrome needed)."""
     for script, args in (("jobs_table.py", []), ("build_views.py", ["--no-pdf"])):
-        p = ROOT / "tools" / script
+        p = CODE / "tools" / script
         if p.exists():
             subprocess.run([sys.executable, str(p), *args], check=False, capture_output=True, cwd=str(ROOT))
 

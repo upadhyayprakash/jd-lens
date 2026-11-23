@@ -1,4 +1,4 @@
-# Master resume data: YOUR NAME
+# Master resume data: Anika Verma (sample)
 
 > **EXAMPLE TEMPLATE.** Everything below is made-up sample data so the extension has something to read on day one.
 > Replace it with your own details, keep the headings and table layouts exactly as they are, then run
@@ -16,10 +16,18 @@ Single source of facts for scoring job descriptions, tailoring resumes and answe
 
 | Field | Value |
 |-------|-------|
-| Name | YOUR NAME |
-| Headline | Senior Software Engineer (example) |
-| Career start | Jul 2014 (Example Corp). |
-| Education | B.Tech Computer Science, Example University, 2010 to 2014 |
+| Name | Anika Verma |
+| Location | Remote (US time zones) |
+| Email | anika.verma@example.com |
+| Phone | +1 (555) 010-0142 |
+| Portfolio | anikaverma.example.com |
+| LinkedIn | /in/example-anika-verma |
+| GitHub | github.com/example-anika-verma |
+| Headline | Senior Software Engineer · TypeScript, React, Node.js |
+| Career start | Jul 2014 (Brightwave Systems). |
+| Education | B.E. Computer Science, Hillcrest Institute of Technology, 2010 to 2014 |
+
+The contact rows above fill the contact block of a tailored resume. Replace all of them with your own.
 
 **Job-search constraints**
 - Region or work mode you need (for example: remote, India-based hiring).
@@ -28,29 +36,35 @@ Single source of facts for scoring job descriptions, tailoring resumes and answe
 
 ## 2. Summary variants (for the top of a resume)
 
-- **S-MAIN (current resume):** Software engineer with 10+ years building web products with TypeScript, React and Node.js. Led the checkout rebuild at Example Corp (latency cut 60%). [F-EX-01]
-- **S-ALT (backend focus):** Backend engineer with 10+ years in Node.js, PostgreSQL and event-driven systems on AWS. [F-EX-02]
+- **S-MAIN (current resume):** Software engineer with 10+ years building payments and checkout products with TypeScript, React and Node.js. Cut checkout latency by 62% at Northwind Labs and built the feature-flag service that now runs on 40 product teams. [F-NW-01, F-NW-02]
+- **S-ALT (backend focus):** Backend engineer with 10+ years in Node.js, NestJS, PostgreSQL and event-driven systems on AWS, from a 2M-events-a-day pipeline to a microservices billing platform. [F-BW-01, F-NW-03, F-NW-04]
 
 ---
 
 ## 3. Experience facts
 
-### Example Corp, Senior Software Engineer (Jan 2021 to now, Remote)
+### Northwind Labs, Senior Software Engineer (Jan 2021 to now, Remote)
 
-- **F-EX-01** (verified) Led the checkout rebuild in React and TypeScript, cutting latency by 60% across web and mobile web.
-- **F-EX-02** (verified) Built the order-events pipeline on Kafka and Node.js, processing 2M events a day.
-- **F-EX-03** (verified) Designed the PostgreSQL schema for the billing service, with role-based views for dashboards.
+- **F-NW-01** (verified) Led the checkout rebuild in React and TypeScript, cutting p95 latency from 420 ms to 160 ms (62%) across web and mobile web.
+- **F-NW-02** (verified) Built Relay, an internal feature-flag service on NestJS and Redis, now used by 40 product teams with zero-downtime rollouts.
+- **F-NW-03** (verified) Designed the PostgreSQL schema for the billing service, with role-based views for finance dashboards.
+- **F-NW-04** (verified) Split the billing and notification modules out of the monolith into microservices that talk over Kafka events.
+- **F-NW-05** (verified) Introduced Storybook for the shared component library and Mocha and Chai contract tests for the services.
 
-### Sample Startup, Software Engineer (Jul 2014 to Dec 2020, Bengaluru)
+### Brightwave Systems, Software Engineer (Jul 2014 to Dec 2020, Pune)
 
-- **F-SS-01** (verified) Built the admin dashboard (React, Express, MySQL) used by 200 internal staff.
+- **F-BW-01** (verified) Built the order-events pipeline on Kafka and Node.js, processing 2M events a day.
+- **F-BW-02** (verified) Built the admin dashboard (React, Express, MySQL) used by 200 support staff, cutting ticket handling time by 25%.
+- **F-BW-03** (verified) Shipped the REST APIs behind the customer mobile app, with automated tests in Jest.
 
 ---
 
 ## 4. Awards, patent, certifications, open work
 
 - **F-CE-01** (verified) AWS Certified Developer, Associate.
-- **F-AW-01** (verified) Winner, Example Corp hackathon, 2022.
+- **F-CE-02** (verified) Completed an online Kubernetes administration course (learning only, no production use).
+- **F-AW-01** (verified) Winner, Northwind Labs hackathon, 2024, smart refunds prototype.
+- **F-OW-01** (verified) Maintainer of a small open source TypeScript client for feature flags.
 
 ---
 
@@ -61,30 +75,42 @@ Evidence = fact IDs from sections 3 and 4. `years` is optional. Levels are expla
 ### Frontend
 | Skill | Level | Evidence | Years | Notes |
 |-------|-------|----------|-------|-------|
-| React (function components, hooks) | listed | F-EX-01, F-SS-01 | | |
-| TypeScript | listed | F-EX-01 | | |
-| Jest | listed | F-EX-01 | | |
+| React (function components, hooks) | listed | F-NW-01, F-BW-02 | | |
+| TypeScript | listed | F-NW-01, F-OW-01 | | |
+| Jest | listed | F-BW-03 | | |
+| Storybook | listed | F-NW-05 | | |
 
 ### Backend
 | Skill | Level | Evidence | Years | Notes |
 |-------|-------|----------|-------|-------|
-| Node.js | listed | F-EX-02 | | |
-| Express.js | user-confirmed | F-SS-01 | since 2014 | |
-| Kafka | listed | F-EX-02 | | |
-| REST APIs | listed | F-EX-02 | | |
+| Node.js | listed | F-BW-01, F-NW-02 | | |
+| Express.js | user-confirmed | F-BW-02 | since 2014 | |
+| NestJS | listed | F-NW-02 | | |
+| Kafka | listed | F-BW-01, F-NW-04 | | |
+| REST APIs | listed | F-BW-03 | | |
+| Microservices | listed | F-NW-04 | | |
+
+### Testing
+| Skill | Level | Evidence | Years | Notes |
+|-------|-------|----------|-------|-------|
+| Mocha | listed | F-NW-05 | | |
+| Chai | listed | F-NW-05 | | |
 
 ### Data
 | Skill | Level | Evidence | Years | Notes |
 |-------|-------|----------|-------|-------|
-| PostgreSQL | listed | F-EX-03 | | |
-| MySQL | listed | F-SS-01 | | |
+| PostgreSQL | listed | F-NW-03 | | |
+| MySQL | listed | F-BW-02 | | |
+| Redis | listed | F-NW-02 | | |
 
 ### Infra and delivery
 | Skill | Level | Evidence | Years | Notes |
 |-------|-------|----------|-------|-------|
 | AWS | listed | F-CE-01 | | |
-| Docker | listed | F-EX-02 | | |
-| Kubernetes | partial | F-CE-01 | | Course only. |
+| Docker | listed | F-BW-01 | | |
+| Kubernetes | partial | F-CE-02 | | Course only. |
+| Go | earlier | | | On an older resume only; confirm before use. |
+| Prometheus | earlier | | | On an older resume only; confirm before use. |
 
 ---
 
@@ -92,8 +118,8 @@ Evidence = fact IDs from sections 3 and 4. `years` is optional. Levels are expla
 
 | If the JD is mostly... | Lead with |
 |------------------------|-----------|
-| Product full-stack | F-EX-01, F-SS-01 |
-| Backend or platform | F-EX-02, F-EX-03 |
+| Product full-stack | F-NW-01, F-BW-02 |
+| Backend or platform | F-NW-02, F-NW-03, F-NW-04 |
 
 ---
 

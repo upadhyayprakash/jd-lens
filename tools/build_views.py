@@ -12,7 +12,10 @@ No third-party packages: a small Markdown converter is included for the subset t
 import html, pathlib, re, subprocess, sys, datetime
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-VIEWS = ROOT / "views"
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths  # noqa: E402  (where the data folder is)
+DATA = paths.DATA
+VIEWS = DATA / "views"
 
 CSS = """
 :root{--bg:#fff;--fg:#1b1d21;--fg2:#4a4f57;--fg3:#6b717a;--rule:#dadcdf;--card:#f6f7f8;--code:#eef0f2;--accent:#1b1d21;--ok:#1f7a4d;--warn:#9a6200;color-scheme:light dark}
@@ -127,7 +130,7 @@ def page(title, body, sub=""):
             f'<p class="sub">{sub} Generated {stamp} by tools/build_views.py. Local file, do not share.</p>{body}</main></body></html>')
 
 def build_master():
-    src = (ROOT / "master" / "master-resume.md").read_text()
+    src = (DATA / "master" / "master-resume.md").read_text()
     body = md_to_html(re.sub(r"^# .*\n", "", src, count=1))
     toc = "".join(f'<li><a href="#{re.sub(r"[^a-z0-9]+","-",h.lower()).strip("-")}">{html.escape(h)}</a></li>'
                   for h in re.findall(r"^## (.*)$", src, re.M))
@@ -138,7 +141,7 @@ def build_master():
 
 def build_applications():
     apps = []
-    for f in sorted((ROOT / "applications").glob("*.md")):
+    for f in sorted((DATA / "applications").glob("*.md")):
         if f.name == "INDEX.md":
             continue
         fm, body = frontmatter(f.read_text())
@@ -171,7 +174,7 @@ def build_brag():
     out_dir = VIEWS / "brag"
     out_dir.mkdir(parents=True, exist_ok=True)
     made = []
-    for f in sorted((ROOT / "applications").glob("*.md")):
+    for f in sorted((DATA / "applications").glob("*.md")):
         if f.name == "INDEX.md":
             continue
         fm, body = frontmatter(f.read_text())

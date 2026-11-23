@@ -5,6 +5,7 @@ node_modules/
 # your own data lives in your clone and never goes into git
 master/master-resume.md
 master/preferences.json
+master/photo.*
 applications/*.md
 applications/.history/
 tailored/*
@@ -21,3 +22,6 @@ tools/jobd/jobs/
 tools/jobd/jobd.config.json
 tools/jobd/*.log
 tools/jobd/jobd-launcher.sh
+
+# where your data folder is, if it is not this folder (tools/paths.py)
+jdlens.config.json

@@ -12,6 +12,8 @@ that is the /job skill's call, made on top of this first pass.
 import json, os, pathlib, re, shutil, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+import paths  # noqa: E402  (where the data folder is)
 
 
 def fail(msg):
@@ -33,7 +35,7 @@ def main():
     if len(sys.argv) != 2 or not re.match(r"^[a-z0-9][a-z0-9-]*$", sys.argv[1]):
         fail("usage: python3 tools/score_app.py <slug>   (slug like northwind-2026-11)")
     slug = sys.argv[1]
-    md = ROOT / "applications" / f"{slug}.md"
+    md = paths.DATA / "applications" / f"{slug}.md"
     if not md.exists():
         fail(f"no such application: {slug}")
     node = node_bin()

@@ -4,16 +4,24 @@
   python3 tools/prefs.py get              all preferences as JSON
   python3 tools/prefs.py get resume_pages one value
   python3 tools/prefs.py set resume_pages 2     (1, 2, 3, 4 or any)
+  python3 tools/prefs.py set resume_layout photo   (basic, two-column or photo)
+  python3 tools/prefs.py layout           the layout file a build starts from (yours in the data folder, else the shipped one)
 
 resume_pages: how long a tailored resume should be. A number is checked by tools/check_resume.py and told to Claude as
 the trim target; "any" means no page target (nothing is trimmed or padded to a count). Default 2, which is what this
-pipeline did before the setting existed."""
+pipeline did before the setting existed.
+
+resume_layout: which base file a tailored resume starts from: basic (one column), two-column (sidebar and main) or photo
+(beige sidebar with a round photo). The files are tailored/_base/layouts/<layout>.html. Default two-column."""
 import argparse, json, os, pathlib, sys, tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-FILE = ROOT / "master" / "preferences.json"
-DEFAULTS = {"resume_pages": 2}
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths  # noqa: E402  (where the data folder is)
+FILE = paths.DATA / "master" / "preferences.json"
+DEFAULTS = {"resume_pages": 2, "resume_layout": "two-column"}
 PAGE_CHOICES = (1, 2, 3, 4, "any")
+LAYOUT_CHOICES = ("basic", "two-column", "photo")
 
 
 class PrefError(Exception):
@@ -31,6 +39,11 @@ def normalise(key, value):
             raise PrefError(f"resume_pages must be one of {list(PAGE_CHOICES)}")
         if v not in PAGE_CHOICES:
             raise PrefError(f"resume_pages must be one of {list(PAGE_CHOICES)}")
+        return v
+    if key == "resume_layout":
+        v = str(value).strip().lower()
+        if v not in LAYOUT_CHOICES:
+            raise PrefError(f"resume_layout must be one of {list(LAYOUT_CHOICES)}")
         return v
     return value
 
@@ -71,6 +84,14 @@ def pages_target():
     return None if v == "any" else v
 
 
+def layout_file():
+    """The base layout a tailored resume starts from: your own file in your data folder (tailored/_base/layouts/<layout>.html)
+    when you have one, otherwise the one that ships with the engine. Returns the absolute path as a string."""
+    name = f"{load()['resume_layout']}.html"
+    mine = paths.DATA / "tailored" / "_base" / "layouts" / name
+    return str(mine if mine.is_file() else paths.CODE / "tailored" / "_base" / "layouts" / name)
+
+
 def pages_phrase():
     v = load()["resume_pages"]
     return "any number of pages (no page target; do not trim or pad to a count)" if v == "any" else f"{v} page{'s' if v != 1 else ''}"
@@ -81,9 +102,13 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     g = sub.add_parser("get"); g.add_argument("key", nargs="?")
     s = sub.add_parser("set"); s.add_argument("key"); s.add_argument("value")
+    sub.add_parser("layout")
     a = ap.parse_args()
     try:
-        if a.cmd == "get":
+        if a.cmd == "layout":
+            f = layout_file()
+            print(json.dumps({"ok": True, "layout": load()["resume_layout"], "file": f, "yours": paths.DATA != paths.CODE and f.startswith(str(paths.DATA))}))
+        elif a.cmd == "get":
             prefs = load()
             if a.key and a.key not in prefs:
                 raise PrefError(f"unknown preference: {a.key!r}")

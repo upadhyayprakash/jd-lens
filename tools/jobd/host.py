@@ -8,13 +8,16 @@ Request:  {"op": "<name>", "args": {...}}      Response: {"ok": true, ...} or {"
 Only the operations in OPS exist. Nothing here runs an arbitrary command or path. Writes go through tools/jobs.py,
 which keeps a backup in applications/.history/. Each operation is logged to tools/jobd/jobd.log (no message contents).
 """
-import datetime, hashlib, json, os, pathlib, re, shutil, struct, subprocess, sys, tempfile, time
+import base64, datetime, hashlib, json, os, pathlib, re, shutil, struct, subprocess, sys, tempfile, time
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import claude_jobs  # noqa: E402
 
-ROOT = HERE.parent.parent
+ROOT = HERE.parent.parent                 # the engine
+sys.path.insert(0, str(ROOT / "tools"))
+import paths  # noqa: E402  (where your data folder is)
+DATA = paths.DATA                            # your data folder (the same folder as the engine unless you set one)
 VERSION = "1.0.0"
 MAX_OUT = 900_000          # Chrome accepts at most 1 MB from a native host
 MAX_IN = 2_000_000
@@ -67,7 +70,7 @@ def slug_arg(args):
 
 # ---- operations -----------------------------------------------------------------------------------
 def op_ping(a):
-    return {"version": VERSION, "repo": str(ROOT), "python": sys.executable,
+    return {"version": VERSION, "repo": str(DATA), "engine": str(ROOT), "data": str(DATA), "data_source": paths.source(), "has_master": (DATA / "master" / "master-resume.md").is_file(), "python": sys.executable,
             "claude": shutil.which("claude", path=claude_jobs._path()) or claude_jobs._config().get("claude"),
             "node": shutil.which("node", path=claude_jobs._path()) or claude_jobs._config().get("node")}
 
@@ -113,7 +116,7 @@ def op_save_jd(a):
         res = jobs("save-jd", f)
     finally:
         shutil.rmtree(d, ignore_errors=True)
-    keep = ROOT / "job-inbox" / "done"
+    keep = DATA / "job-inbox" / "done"
     keep.mkdir(parents=True, exist_ok=True)
     (keep / f"{res['slug']}.json").write_text(json.dumps(clean, indent=2, ensure_ascii=False))
     return res
@@ -146,6 +149,128 @@ def op_set_pref(a):
     return run_script(ROOT / "tools" / "prefs.py", "set", need(a, "key"), str(need(a, "value", (str, int))))
 
 
+def op_open_folder(a):
+    """Open the data folder or the engine folder in the file manager (Finder). Only these two folders can be opened."""
+    target = {"data": DATA, "engine": ROOT}.get(need(a, "which"))
+    if target is None:
+        raise OpError("which must be 'data' or 'engine'")
+    if not target.is_dir():
+        raise OpError("that folder does not exist yet")
+    opener = os.environ.get("JD_LENS_OPEN") or ("open" if sys.platform == "darwin" else "xdg-open")
+    r = subprocess.run([opener, str(target)], capture_output=True, text=True, timeout=20)
+    if r.returncode != 0:
+        raise OpError("could not open the folder: " + (r.stderr or r.stdout).strip()[:200])
+    return {"opened": str(target)}
+
+
+def op_data_dir(a):
+    """Where the engine and the user's data folder are, and whether the data folder has a master resume yet."""
+    return paths.info()
+
+
+def op_choose_data_dir(a):
+    """Ask macOS for a folder (a native folder picker). Returns {"path": ...} or {"cancelled": true}; nothing is changed yet."""
+    if sys.platform != "darwin":
+        raise OpError("the folder picker is only available on macOS; set the folder with: python3 tools/paths.py set <folder>")
+    script = 'POSIX path of (choose folder with prompt "Choose the folder that holds your JD Lens data (your master resume and applications)")'
+    r = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=300)
+    if r.returncode != 0:
+        if "-128" in r.stderr:                      # the user pressed Cancel
+            return {"cancelled": True}
+        raise OpError("could not open the folder picker: " + r.stderr.strip()[:200])
+    return {"path": r.stdout.strip().rstrip("/") or r.stdout.strip()}
+
+
+def op_set_data_dir(a):
+    """Use this folder for the user's data. `sample` adds the made-up sample master resume if the folder has none. The skill profile
+    the extension reads is rebuilt from the new folder, so the panel scores against the right resume straight away."""
+    path = need(a, "path")
+    try:
+        added = paths.init_data_folder(path) if a.get("sample") else False
+        paths.set_data_dir(path)
+    except paths.PathsError as e:
+        raise OpError(str(e))
+    info = paths.info()
+    out = dict(info, sample_added=added, profile_rebuilt=False)
+    if info["has_master"]:
+        r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_profile.py")], cwd=str(ROOT), capture_output=True, text=True, timeout=120,
+                           env=dict(os.environ, JD_LENS_DATA=""))
+        out["profile_rebuilt"] = r.returncode == 0
+        if r.returncode != 0:
+            out["profile_error"] = (r.stderr or r.stdout).strip()[-400:]
+    return out
+
+
+def op_clear_data_dir(a):
+    paths.clear_data_dir()
+    return dict(paths.info(), profile_rebuilt=False)
+
+
+PHOTO_EXT = {".jpg", ".jpeg", ".png", ".heic", ".gif", ".tif", ".tiff", ".bmp", ".webp"}
+PHOTO_MAX_BYTES = 25_000_000
+
+
+def _photo_file():
+    return DATA / "master" / "photo.jpg"
+
+
+def _photo_info():
+    f = _photo_file()
+    if not f.is_file():
+        return {"has_photo": False}
+    info = {"has_photo": True, "path": str(f), "bytes": f.stat().st_size}
+    with tempfile.TemporaryDirectory() as td:        # a small preview for the panel (the panel cannot read your files itself)
+        small = pathlib.Path(td) / "preview.jpg"
+        r = subprocess.run(["sips", "-s", "format", "jpeg", "-Z", "160", str(f), "--out", str(small)], capture_output=True, text=True, timeout=30)
+        if r.returncode == 0 and small.is_file():
+            info["preview"] = "data:image/jpeg;base64," + base64.b64encode(small.read_bytes()).decode()
+    return info
+
+
+def op_photo_info(a):
+    """Whether the data folder has a profile photo (master/photo.jpg), with a small preview of it."""
+    return _photo_info()
+
+
+def op_choose_photo(a):
+    """A native macOS file picker for a picture. Returns {"path": ...} or {"cancelled": true}; nothing is changed yet."""
+    if sys.platform != "darwin":
+        raise OpError("the file picker is only available on macOS; copy a JPEG to master/photo.jpg in your data folder instead")
+    script = 'POSIX path of (choose file of type {"public.image"} with prompt "Choose your profile photo (it stays on your computer)")'
+    r = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=300)
+    if r.returncode != 0:
+        if "-128" in r.stderr:
+            return {"cancelled": True}
+        raise OpError("could not open the file picker: " + r.stderr.strip()[:200])
+    return {"path": r.stdout.strip()}
+
+
+def op_set_photo(a):
+    """Use this picture as the profile photo: resized to fit 800 px and saved as master/photo.jpg in the data folder."""
+    src = pathlib.Path(need(a, "path"))
+    if not src.is_absolute() or not src.is_file():
+        raise OpError("that file does not exist")
+    if src.suffix.lower() not in PHOTO_EXT:
+        raise OpError("choose a picture (JPEG, PNG or HEIC)")
+    if src.stat().st_size > PHOTO_MAX_BYTES:
+        raise OpError("that picture is larger than 25 MB; choose a smaller one")
+    dest = _photo_file()
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_name(".photo-new.jpg")
+    r = subprocess.run(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "85", "-Z", "800", str(src), "--out", str(tmp)],
+                       capture_output=True, text=True, timeout=60)
+    if r.returncode != 0 or not tmp.is_file() or tmp.stat().st_size == 0:
+        tmp.unlink(missing_ok=True)
+        raise OpError("could not read that picture: " + (r.stderr or r.stdout).strip()[:200])
+    os.replace(tmp, dest)
+    return _photo_info()
+
+
+def op_remove_photo(a):
+    _photo_file().unlink(missing_ok=True)
+    return _photo_info()
+
+
 DATA_DIR = ROOT / "tools" / "jd-capture-extension" / "data"
 
 
@@ -167,7 +292,7 @@ def op_get_data(a):
 
 def op_profile_status(a):
     pf = ROOT / "tools" / "jd-capture-extension" / "data" / "profile.json"
-    master = ROOT / "master" / "master-resume.md"
+    master = DATA / "master" / "master-resume.md"
     sha = hashlib.sha256(master.read_text(encoding="utf-8").encode("utf-8")).hexdigest() if master.exists() else None
     if not pf.exists():
         return {"current": False, "reason": "no profile built yet"}
@@ -191,8 +316,8 @@ def op_rebuild_views(a):
 
 
 def op_master_view(a):
-    v = ROOT / "views"
-    master = ROOT / "master" / "master-resume.md"
+    v = DATA / "views"
+    master = DATA / "master" / "master-resume.md"
     html, pdf = v / "master-resume.html", v / "master-resume.pdf"
     stale = not html.exists() or html.stat().st_mtime < master.stat().st_mtime
     want_pdf = bool(a.get("pdf"))
@@ -205,7 +330,7 @@ def op_brag_view(a):
     """Path of the printable Brag Sheet page for one application (rebuilt first, so it matches the application file)."""
     slug = slug_arg(a)
     op_rebuild_views({})
-    f = ROOT / "views" / "brag" / f"{slug}.html"
+    f = DATA / "views" / "brag" / f"{slug}.html"
     return {"html": str(f) if f.exists() else "", "found": f.exists()}
 
 
@@ -218,7 +343,7 @@ def op_rescore_saved(a):
         raise OpError("build the skill profile first (python3 tools/build_profile.py)")
     results = []
     for app in jobs("list")["applications"]:
-        md = ROOT / "applications" / f"{app['slug']}.md"
+        md = DATA / "applications" / f"{app['slug']}.md"
         r = subprocess.run([node, str(ROOT / "tools" / "score_jd.mjs"), str(md)], capture_output=True, text=True, timeout=60)
         try:
             new = json.loads(r.stdout).get("score")
@@ -237,7 +362,7 @@ def op_rescore_saved(a):
 def op_read_section(a):
     slug = slug_arg(a)
     name = need(a, "section")
-    text = (ROOT / "applications" / f"{slug}.md").read_text(encoding="utf-8")
+    text = (DATA / "applications" / f"{slug}.md").read_text(encoding="utf-8")
     m = re.search(rf"^## {re.escape(name)}[^\n]*\n(.*?)(?=^## |\Z)", text, re.S | re.M)
     return {"section": name, "text": (m.group(1).strip() if m else "")[:30000], "found": bool(m)}
 
@@ -268,6 +393,8 @@ OPS = {
     "rebuild_views": op_rebuild_views, "brag_view": op_brag_view, "master_view": op_master_view, "read_section": op_read_section, "rescore_saved": op_rescore_saved,
     "claude_start": op_claude_start, "claude_status": op_claude_status, "claude_cancel": op_claude_cancel,
     "questions": op_questions, "answer": op_answer,
+    "photo_info": op_photo_info, "choose_photo": op_choose_photo, "set_photo": op_set_photo, "remove_photo": op_remove_photo,
+    "open_folder": op_open_folder, "data_dir": op_data_dir, "choose_data_dir": op_choose_data_dir, "set_data_dir": op_set_data_dir, "clear_data_dir": op_clear_data_dir,
 }
 
 

@@ -42,7 +42,7 @@ Not sure what you have? After step 2 below, run `python3 tools/doctor.py`: it ch
 | Where | What | Leaves your computer? |
 |-------|------|-----------------------|
 | **Chrome storage** (`chrome.storage.local`) | Threshold, theme, text size, score history, salary notes you typed, step ticks | No. Never synced to your Google account |
-| **The project folder** | `master/` your resume facts, `applications/` your saved JDs and history, `tailored/` resumes built for a job, `job-inbox/` copies of saved JDs, `views/` readable pages | No |
+| **Your data folder** (the project folder unless you choose another, see section 10) | `master/` your resume facts, `applications/` your saved JDs and history, `tailored/` resumes built for a job, `job-inbox/` copies of saved JDs, `views/` readable pages | No |
 | **`tools/jd-capture-extension/data/`** | Generated copies the extension reads: your skills, your readable resume (no phone or email), a short list of your applications | No |
 
 ### Network
@@ -234,6 +234,12 @@ Open `master/master-resume.md` and add a heading in section 3 in this form, then
 
 Use a short unique ID prefix per company. Reference those IDs in section 5, then run `python3 tools/build_profile.py`.
 
+### Choose a resume layout, contact details and a photo
+
+- **Layout:** Settings, **Tailored resume layout**: *Basic* (one column), *Two column* (sidebar and main) or *With photo*. A tailored resume starts from that layout. To use a layout of your own, put a file with the same name in `tailored/_base/layouts/` inside your data folder (for example `two-column.html`); it replaces the shipped one. Keep its structure and its `@page` print rules.
+- **Contact details:** they come from the table in section 1 of your master resume (Name, Location, Email, Phone, Portfolio, LinkedIn, GitHub, Headline). The layouts ship with made-up sample values, and the build replaces every one of them with yours and leaves out a line whose row is empty. The file name uses your name too (Priya Rao gives `priya_rao_resume_<company>.pdf`).
+- **Photo (With photo layout only):** Settings, **Profile photo**, **Choose photo...** (macOS file picker; the picture is resized and saved as `master/photo.jpg` in your data folder). You can also copy a JPEG there yourself. It stays on your computer (it is git-ignored together with the rest of your data). Without one, the layout keeps a plain avatar. Many employers, especially in the US and UK, prefer resumes without a photo; use it where it is the norm.
+
 ### Understand why a JD got its score
 
 Open **JD > Analysis**. **Requirement comparison** lists each requirement as met, partial or a gap, with the fact IDs that back it (tap an ID to read the fact). **Key skills match** shows matched, missing, unconfirmed and additional skills. **Potential concerns** lists what needs your own judgement. After a full score, **Claude's assessment** shows the written reasoning.
@@ -308,6 +314,16 @@ Copy the file you want back over the current one, then run `python3 tools/build_
 | `docs/` | This guide, design notes, decisions | Docs |
 
 Back up `master/`, `applications/` and `tailored/`. Everything else can be rebuilt.
+
+### Keeping your data in its own folder
+
+By default your data lives in the project folder. You can keep it somewhere else instead, for example a private repo of your own, so the project folder holds only code and you can update or replace it freely:
+
+- **In the panel:** Settings, **Your data folder**, **Choose folder...**. Pick the folder. If it has no master resume, JD Lens can add the sample one.
+- **From a terminal** (in the project folder, the one that contains `tools/`): `python3 tools/setup.py --data-dir "/full/path/to/folder"` (first install), or later `python3 tools/paths.py set "/full/path/to/folder"`. `python3 tools/paths.py show` says where things are, and `python3 tools/paths.py clear` goes back to the project folder.
+- **To start a new folder by hand:** `python3 tools/paths.py init "/full/path/to/folder"` creates `master/`, `applications/`, `tailored/` and `views/` and copies the sample master resume into it. An existing master resume is never replaced.
+
+The folder only needs those subfolders (`job-inbox/` appears when you save a JD). The extension and the scripts then read and write it there. Claude runs start in that folder, with the project folder added so the `/job` skill is found. The generated files in `tools/jd-capture-extension/data/` stay with the extension. The setting is stored in `jdlens.config.json` next to `tools/` (git-ignored); the `JD_LENS_DATA` environment variable overrides it.
 
 ---
 

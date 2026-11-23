@@ -36,7 +36,15 @@
 
   // ---- small helpers -------------------------------------------------------------------------------
   const repo = () => (state.profile && state.profile.repo_path) || '/path/to/jd-lens';
-  const cmd = (inner) => `cd "${repo()}" && ${inner}`;
+  // Terminal fallbacks: when your data folder is not the engine folder, run in the data folder and point Claude and the tools at the engine.
+  const terminalCmd = (inner, dataDir, engine) => {
+    let c = inner;
+    if (engine && dataDir && engine !== dataDir) c = c.replace(/\btools\/([\w./-]+)/g, (m, f) => `"${engine}/tools/${f}"`).replace(/\bclaude "/g, `claude --add-dir "${engine}" "`);
+    return `cd "${dataDir}" && ${c}`;
+  };
+  const engineDir = () => (state.helper && state.helper.ok && state.helper.engine) || '';
+  const separate = () => !!(engineDir() && state.helper.data && engineDir() !== state.helper.data);
+  const cmd = (inner) => terminalCmd(inner, repo(), engineDir());
   const jdKey = () => normUrl(state.scan && state.scan.url);
   const helperOk = () => !!(state.helper && state.helper.ok);
   const claudeBusy = () => state.job && state.job.state === 'running';
@@ -150,12 +158,90 @@
   async function refreshHelper() {
     const r = await A.host('ping');
     state.helper = r;
-    if (r.ok) { const ps = await A.host('profile_status'); state.stale = ps.ok && ps.current === false; const pr = await A.host('get_prefs'); if (pr.ok) state.prefs = pr.prefs; }
+    if (r.ok) { const ps = await A.host('profile_status'); state.stale = ps.ok && ps.current === false; const pr = await A.host('get_prefs'); if (pr.ok) state.prefs = pr.prefs; const ph = await A.host('photo_info'); state.photo = ph.ok ? ph : { has_photo: false }; }
   }
   async function setPages(v) {
     const r = await A.host('set_pref', { key: 'resume_pages', value: String(v) });
     if (!r.ok) { state.error = r.error; render(); return; }
     state.prefs = r.prefs; state.error = ''; toast(v === 'any' ? 'Tailored resumes can be any length' : `Tailored resumes target ${v} page${v === 1 ? '' : 's'}`);
+  }
+  // ---- open a folder in Finder ----
+  async function openFolder(which) {
+    const r = await A.host('open_folder', { which });
+    if (!r.ok) { state.error = r.error; render(); }
+  }
+  const folderBtn = (which, label) => h('button', { class: 'ibtn folder-btn', 'aria-label': label, title: label, on: { click: () => openFolder(which) } }, ic('folder'));
+  const pathWithOpen = (text, which, label) => h('span', { class: 'path-open' }, h('span', { class: 'path-text' }, text), helperOk() ? folderBtn(which, label) : null);
+
+  // ---- profile photo (the With photo layout) ----
+  async function choosePhoto() {
+    const c = await A.host('choose_photo');
+    if (!c.ok) { state.error = c.error; render(); return; }
+    if (c.cancelled) return;
+    const r = await A.host('set_photo', { path: c.path });
+    if (!r.ok) { state.error = r.error; render(); return; }
+    state.photo = r; state.error = ''; toast('Photo saved. Tailored resumes with the photo layout use it.'); render();
+  }
+  async function removePhoto() {
+    const r = await A.host('remove_photo');
+    if (!r.ok) { state.error = r.error; render(); return; }
+    state.photo = r; state.error = ''; toast('Photo removed. The photo layout shows a plain avatar again.'); render();
+  }
+  function photoCard() {
+    const ok = helperOk(), ph = state.photo || { has_photo: false };
+    return h('div', { class: 'card', id: 'photo-card' }, h('div', { class: 'card-title' }, 'Profile photo'),
+      h('div', { class: 'faint' }, 'Used only by the With photo layout. It stays on your computer: the picture is resized and kept as master/photo.jpg in your data folder, and is never committed or sent anywhere except into your own resume PDF.'),
+      h('div', { class: 'row', style: 'margin-top:.5rem;align-items:center;gap:.75rem' },
+        ph.has_photo && ph.preview ? h('img', { class: 'photo-preview', src: ph.preview, alt: 'Your profile photo' }) : h('div', { class: 'photo-preview empty', 'aria-hidden': 'true' }, ic('user')),
+        h('div', { style: 'display:grid;gap:.5rem' },
+          h('div', { class: 'faint' }, ph.has_photo ? 'Photo in use.' : 'No photo yet: the layout shows a plain avatar.'),
+          ok ? h('div', { class: 'row' }, h('button', { class: 'btn action', on: { click: choosePhoto } }, ph.has_photo ? 'Change photo...' : 'Choose photo...'),
+            ph.has_photo ? h('button', { class: 'btn small', on: { click: removePhoto } }, 'Remove photo') : null)
+          : h('div', { class: 'faint' }, 'Needs the local helper (it saves the picture in your data folder).'))));
+  }
+
+  // ---- your data folder ----------------------------------------------------------------------------------------
+  async function afterDataFolderChange(msg) {
+    await refreshHelper(); await loadApps();
+    { const d = await J.loadData(['profile', 'resume']); state.profile = d.profile; state.resume = d.resume; }
+    state.dataChoice = null; state.error = ''; toast(msg); render();
+  }
+  async function chooseDataFolder() {
+    const c = await A.host('choose_data_dir');
+    if (!c.ok) { state.error = c.error; render(); return; }
+    if (c.cancelled) return;
+    state.dataChoice = { path: c.path, sample: true }; render();
+  }
+  async function applyDataFolder() {
+    const ch = state.dataChoice; if (!ch) return;
+    const r = await A.host('set_data_dir', { path: ch.path, sample: !!ch.sample });
+    if (!r.ok) { state.error = r.error; render(); return; }
+    await afterDataFolderChange(r.sample_added ? 'Using that folder. The sample master resume was added.' : r.has_master ? 'Using that folder.' : 'Using that folder. It has no master resume yet.');
+  }
+  async function clearDataFolder() {
+    const r = await A.host('clear_data_dir');
+    if (!r.ok) { state.error = r.error; render(); return; }
+    await afterDataFolderChange('Using the engine folder for your data again.');
+  }
+  function openDataFolder() { go('settings'); setTimeout(() => { const el = document.getElementById('data-folder-card'); if (el) el.scrollIntoView({ block: 'start' }); }, 0); }
+  function dataFolderCard() {
+    const hp = state.helper, ok = helperOk(), ch = state.dataChoice;
+    const bySource = { env: 'an environment variable', config: 'this setting', engine: 'the default: the engine folder' };
+    return h('div', { class: 'card', id: 'data-folder-card' }, h('div', { class: 'card-title' }, 'Your data folder'),
+      h('div', { class: 'faint' }, 'The folder that holds your master resume, applications and tailored resumes. It can be anywhere, for example your own private repo. JD Lens itself (the engine) never stores your data.'),
+      ok ? h('dl', { class: 'kv', style: 'margin-top:.5rem' }, h('dt', null, 'Folder'), h('dd', null, pathWithOpen(hp.data || hp.repo, 'data', 'Open the data folder')), h('dt', null, 'Set by'), h('dd', null, bySource[hp.data_source] || 'the default'),
+        h('dt', null, 'Master resume'), h('dd', null, hp.has_master === false ? h('span', { class: 'pill warn' }, 'not found') : h('span', { class: 'pill ok' }, 'found'))) : null,
+      ok && ch ? h('div', { class: 'banner info stack', style: 'margin-top:.5rem' }, h('div', null, h('b', null, 'Use this folder? '), h('span', { style: 'overflow-wrap:anywhere' }, ch.path)),
+        h('label', { class: 'faint', style: 'display:flex;gap:.5rem;align-items:center' }, h('input', { type: 'checkbox', checked: ch.sample ? true : null, on: { change: (e) => { ch.sample = e.target.checked; } } }), 'Add the sample master resume if the folder has none'),
+        h('div', { class: 'row' }, h('button', { class: 'btn primary', on: { click: applyDataFolder } }, 'Use this folder'), h('button', { class: 'btn', on: { click: () => { state.dataChoice = null; render(); } } }, 'Cancel')))
+        : ok ? h('div', { class: 'row', style: 'margin-top:.5rem' }, h('button', { class: 'btn action', on: { click: chooseDataFolder } }, 'Choose folder...'), separate() ? h('button', { class: 'btn small', on: { click: clearDataFolder } }, 'Use the engine folder') : null)
+        : h('div', { class: 'faint', style: 'margin-top:.5rem' }, 'Needs the local helper (it reads and writes the folder).'));
+  }
+  const LAYOUTS = [['basic', 'Basic', 'One column'], ['two-column', 'Two column', 'Sidebar and main'], ['photo', 'With photo', 'Sidebar with a photo']];
+  async function setLayout(v) {
+    const r = await A.host('set_pref', { key: 'resume_layout', value: v });
+    if (!r.ok) { state.error = r.error; render(); return; }
+    state.prefs = r.prefs; state.error = ''; toast(`Tailored resumes use the ${(LAYOUTS.find((l) => l[0] === v) || [v, v])[1].toLowerCase()} layout`);
   }
   async function boot() {
     state.settings = Object.assign(state.settings, await A.settings.get());
@@ -361,6 +447,10 @@
     if (state.error) out.push(h('div', { class: 'banner bad', role: 'alert' }, h('div', { class: 'grow' }, h('b', null, 'Something went wrong. '), state.error)));
     if (state.helper && !state.helper.ok) {
       out.push(h('div', { class: 'banner warn stack' }, h('div', null, h('b', null, 'Local helper not connected. '), 'Scoring works, but saving, status changes and Claude actions need the helper. Install it once:'), cmdRow(cmd('python3 tools/jobd/install.py'))));
+    }
+    if (state.helper && state.helper.ok && state.helper.has_master === false) {
+      out.push(h('div', { class: 'banner info stack', id: 'first-run' }, h('div', null, h('b', null, 'No master resume in your data folder yet. '), 'Choose the folder that holds your resume data, or add the sample one to try JD Lens.'),
+        h('div', { class: 'row' }, h('button', { class: 'btn small action', on: { click: openDataFolder } }, 'Choose data folder', ic('arrow')))));
     }
     const nudge = permissionNudge();
     if (nudge) out.push(nudge);
@@ -949,6 +1039,12 @@
         h('div', { class: 'faint' }, 'How many pages a tailored resume should have. Claude trims to this and the build check enforces it. Choose Any length to leave it open.'),
         h('div', { style: 'margin-top:.5rem' }, h('div', { class: 'segmented', role: 'group' }, [[1, '1 page'], [2, '2 pages'], [3, '3 pages'], ['any', 'Any length']].map(([v, label]) => h('button', { 'aria-pressed': String(((state.prefs || {}).resume_pages || 2) === v), disabled: helperOk() ? null : true, on: { click: () => setPages(v) } }, label)))),
         helperOk() ? null : h('div', { class: 'faint', style: 'margin-top:.5rem' }, 'Needs the local helper (it keeps this next to your master resume).')),
+      h('div', { class: 'card', id: 'resume-layout-card' }, h('div', { class: 'card-title' }, 'Tailored resume layout'),
+        h('div', { class: 'faint' }, 'The look a tailored resume starts from. The previews use made-up content; your resume uses your own facts.'),
+        h('div', { class: 'layout-pick', role: 'group', 'aria-label': 'Tailored resume layout', style: 'margin-top:.5rem' }, LAYOUTS.map(([v, label, hint]) => h('button', { 'aria-pressed': String(((state.prefs || {}).resume_layout || 'two-column') === v), 'aria-label': `${label} layout: ${hint}`, disabled: helperOk() ? null : true, on: { click: () => setLayout(v) } },
+          h('img', { src: `layouts/${v}.png`, alt: '', loading: 'lazy' }), h('span', { class: 'layout-name' }, label), h('span', { class: 'faint' }, hint)))),
+        helperOk() ? null : h('div', { class: 'faint', style: 'margin-top:.5rem' }, 'Needs the local helper (it keeps this next to your master resume).')),
+      photoCard(),
       h('div', { class: 'card' }, h('div', { class: 'card-title' }, 'Appearance'),
         h('div', { class: 'faint' }, 'Theme'), h('div', { style: 'margin:.25rem 0 .75rem' }, seg('theme', [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']])),
         h('div', { class: 'faint' }, 'Text size. Chrome has no zoom for side panels, so the panel scales itself. Cmd or Ctrl with + , - or 0 also works while it has focus.'),
@@ -959,9 +1055,11 @@
       h('div', { class: 'card' }, h('div', { class: 'card-title' }, 'Reading page'),
         h('div', { class: 'faint' }, 'By default the panel reads a page only when you click the JD Lens icon on it. You can allow it to re-read automatically as you switch tabs while the panel is open. Any http or https page works; browser pages such as chrome:// cannot be read. The pin keeps one JD in place.'),
         h('div', { style: 'margin-top:.5rem' }, state.autoScan ? h('span', { class: 'pill ok' }, 'Automatic reading is on') : h('button', { class: 'btn small', on: { click: async () => { state.autoScan = await A.requestAutoScan(); render(); } } }, 'Allow reading job pages automatically'))),
+      dataFolderCard(),
       h('div', { class: 'card' }, h('div', { class: 'card-title' }, 'Local helper'),
-        state.helper && state.helper.ok ? h('dl', { class: 'kv' }, h('dt', null, 'Status'), h('dd', null, h('span', { class: 'pill ok' }, 'connected')), h('dt', null, 'Repo'), h('dd', null, state.helper.repo),
-          h('dt', null, 'Resume file'), h('dd', null, state.helper.repo + '/master/master-resume.md'), h('dt', null, 'Skill profile'), h('dd', null, state.helper.repo + '/tools/jd-capture-extension/data/profile.json'),
+        state.helper && state.helper.ok ? h('dl', { class: 'kv' }, h('dt', null, 'Status'), h('dd', null, h('span', { class: 'pill ok' }, 'connected')), h('dt', null, separate() ? 'Data folder' : 'Repo'), h('dd', null, pathWithOpen(state.helper.data || state.helper.repo, 'data', 'Open the data folder')),
+          separate() ? [h('dt', null, 'Engine'), h('dd', null, pathWithOpen(engineDir(), 'engine', 'Open the engine folder'))] : null,
+          h('dt', null, 'Resume file'), h('dd', null, (state.helper.data || state.helper.repo) + '/master/master-resume.md'), h('dt', null, 'Skill profile'), h('dd', null, (engineDir() || state.helper.repo) + '/tools/jd-capture-extension/data/profile.json'),
           h('dt', null, 'Claude'), h('dd', null, state.helper.claude || 'not found'), h('dt', null, 'Version'), h('dd', null, state.helper.version))
           : h('div', null, h('span', { class: 'pill warn' }, 'not connected'), state.helper && state.helper.error ? h('div', { class: 'faint', style: 'margin-top:.5rem' }, 'Chrome says: ' + state.helper.error) : null, cmdRow(cmd('python3 tools/jobd/install.py'), 'Install once:'))),
       h('div', { class: 'card' }, h('div', { class: 'card-title' }, 'Skill profile'),

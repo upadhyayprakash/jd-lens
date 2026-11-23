@@ -3,7 +3,7 @@
 so no real application file is written and no Claude usage is spent.
 Run: python3 -m unittest discover -s tools/tests -v
 """
-import json, os, pathlib, shutil, stat, struct, subprocess, sys, tempfile, time, unittest
+import json, os, pathlib, shutil, stat, struct, subprocess, sys, tempfile, time, unittest, zlib
 
 REAL = pathlib.Path(__file__).resolve().parent.parent.parent
 
@@ -66,12 +66,146 @@ class HostTest(unittest.TestCase):
         self.assertFalse(r["ok"], r)
         return r
 
+    def import_real_claude_jobs(self):
+        """The real helper code, imported in single-folder mode whatever the developer's own jdlens.config.json says (the
+        environment variable beats the config file), with every cached tool module dropped before and after."""
+        mods = ("claude_jobs", "prefs", "paths", "identity")
+        for m in mods:
+            sys.modules.pop(m, None)
+        jobd = str(REAL / "tools" / "jobd")
+        sys.path.insert(0, jobd)
+        old_env = os.environ.get("JD_LENS_DATA")
+        os.environ["JD_LENS_DATA"] = str(REAL)
+        def undo():
+            sys.path.remove(jobd)
+            for m in mods:
+                sys.modules.pop(m, None)
+            if old_env is None:
+                os.environ.pop("JD_LENS_DATA", None)
+            else:
+                os.environ["JD_LENS_DATA"] = old_env
+        self.addCleanup(undo)
+        import claude_jobs
+        return claude_jobs
+
     # ---- basics and validation
     def test_ping_and_unknown_op(self):
         r = self.ok("ping")
         self.assertEqual(r["repo"], str(self.tmp))
         self.assertIn("unknown operation", self.bad("rm_rf")["error"])
         self.assertIn("'op'", unframe(subprocess.run([sys.executable, str(self.tmp / "tools/jobd/host.py")], input=frame([1, 2]), capture_output=True).stdout)[0]["error"])
+
+    # ---- the data folder (engine and data in different places)
+    def test_ping_reports_engine_data_and_master(self):
+        r = self.ok("ping")
+        self.assertEqual((r["engine"], r["data"], r["data_source"], r["has_master"]), (str(self.tmp), str(self.tmp), "engine", True))
+
+    def test_set_data_dir_with_sample_rebuilds_the_profile_and_clear_goes_back(self):
+        new = self.tmp.parent / (self.tmp.name + "-my data")      # a space in the path on purpose
+        self.addCleanup(shutil.rmtree, new, ignore_errors=True)
+        shutil.copy2(REAL / "master" / "master-resume.template.md", self.tmp / "master")        # a real engine ships the sample template
+        r = self.ok("set_data_dir", path=str(new), sample=True)
+        self.assertEqual((r["data"], r["separate"], r["sample_added"], r["has_master"], r["profile_rebuilt"]), (str(new), True, True, True, True), r)
+        self.assertTrue((new / "master" / "master-resume.md").is_file() and (new / "applications").is_dir())
+        prof = json.loads((self.tmp / "tools" / "jd-capture-extension" / "data" / "profile.json").read_text())
+        self.assertEqual(prof["repo_path"], str(new), "the cache is rebuilt from the new data folder")
+        ping = self.ok("ping")
+        self.assertEqual((ping["data"], ping["repo"], ping["engine"], ping["data_source"]), (str(new), str(new), str(self.tmp), "config"))
+        self.assertEqual(self.ok("list")["applications"], [], "the new folder has no applications yet")
+        again = self.ok("set_data_dir", path=str(new), sample=True)
+        self.assertFalse(again["sample_added"], "an existing master resume is never replaced")
+        back = self.ok("clear_data_dir")
+        self.assertEqual((back["data"], back["separate"]), (str(self.tmp), False))
+        self.assertEqual(len(self.ok("list")["applications"]), 3)
+
+    def test_set_data_dir_without_sample_leaves_an_empty_folder_and_says_so(self):
+        new = self.tmp.parent / (self.tmp.name + "-empty")
+        self.addCleanup(shutil.rmtree, new, ignore_errors=True)
+        r = self.ok("set_data_dir", path=str(new))
+        self.assertEqual((r["has_master"], r["profile_rebuilt"], r["sample_added"]), (False, False, False))
+        self.assertFalse((new / "master").exists(), "nothing is created unless the sample was asked for")
+        self.assertFalse(self.ok("ping")["has_master"])
+
+    def test_set_data_dir_rejects_bad_paths(self):
+        self.assertIn("full path", self.bad("set_data_dir", path="relative/folder")["error"])
+        self.assertIn("home folder", self.bad("set_data_dir", path=str(pathlib.Path.home()))["error"])
+        f = self.tmp / "afile"; f.write_text("x")
+        self.assertIn("not a folder", self.bad("set_data_dir", path=str(f))["error"])
+        self.bad("set_data_dir")
+        self.assertEqual(self.ok("ping")["data_source"], "engine", "a rejected path changes nothing")
+
+    # ---- the profile photo (the With photo layout)
+    def _png(self, name, w, h):
+        raw = b"".join(b"\x00" + bytes((200, 160, 120)) * w for _ in range(h))
+        def chunk(t, d):
+            return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xffffffff)
+        f = self.tmp / name
+        f.write_bytes(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
+        return f
+
+    @unittest.skipUnless(sys.platform == "darwin", "photos are converted with macOS sips")
+    def test_photo_set_resizes_to_jpeg_previews_and_can_be_removed(self):
+        self.assertFalse(self.ok("photo_info")["has_photo"])
+        r = self.ok("set_photo", path=str(self._png("big.png", 1600, 1200)))
+        dest = self.tmp / "master" / "photo.jpg"
+        self.assertTrue(r["has_photo"] and dest.is_file(), r)
+        self.assertEqual(dest.read_bytes()[:2], b"\xff\xd8", "saved as a JPEG")
+        w = int(subprocess.run(["sips", "-g", "pixelWidth", str(dest)], capture_output=True, text=True).stdout.split()[-1])
+        self.assertLessEqual(w, 800, "resized to fit 800 px")
+        self.assertTrue(r["preview"].startswith("data:image/jpeg;base64,"))
+        self.assertTrue(self.ok("photo_info")["has_photo"])
+        self.assertFalse(self.ok("remove_photo")["has_photo"])
+        self.assertFalse(dest.exists())
+        self.assertFalse(self.ok("remove_photo")["has_photo"], "removing twice is fine")
+
+    @unittest.skipUnless(sys.platform == "darwin", "photos are converted with macOS sips")
+    def test_photo_goes_into_the_data_folder_when_it_is_apart_from_the_engine(self):
+        new = self.tmp.parent / (self.tmp.name + "-photo data")
+        self.addCleanup(shutil.rmtree, new, ignore_errors=True)
+        shutil.copy2(REAL / "master" / "master-resume.template.md", self.tmp / "master")
+        self.ok("set_data_dir", path=str(new), sample=True)
+        self.ok("set_photo", path=str(self._png("p.png", 300, 300)))
+        self.assertTrue((new / "master" / "photo.jpg").is_file())
+        self.assertFalse((self.tmp / "master" / "photo.jpg").exists(), "the photo must not land in the engine folder")
+
+    def test_photo_rejects_bad_input_and_keeps_the_old_photo(self):
+        self.assertIn("does not exist", self.bad("set_photo", path=str(self.tmp / "nope.png"))["error"])
+        self.assertIn("does not exist", self.bad("set_photo", path="relative.png")["error"])
+        txt = self.tmp / "notes.txt"; txt.write_text("hello")
+        self.assertIn("choose a picture", self.bad("set_photo", path=str(txt))["error"])
+        self.bad("set_photo")
+        self.assertFalse((self.tmp / "master" / "photo.jpg").exists())
+
+    # ---- open a folder in the file manager (a stub opener records what would open; Finder is never started)
+    def _opener(self):
+        rec = self.tmp / "opened.txt"
+        stub = self.tmp / "fake-open.sh"
+        stub.write_text('#!/bin/sh\nprintf "%s\\n" "$1" >> "$OPENED"\n')
+        stub.chmod(0o755)
+        self.env = dict(self.env, JD_LENS_OPEN=str(stub), OPENED=str(rec))
+        return rec
+
+    def test_open_folder_opens_only_the_data_or_the_engine_folder(self):
+        rec = self._opener()
+        self.assertEqual(self.ok("open_folder", which="data")["opened"], str(self.tmp))
+        new = self.tmp.parent / (self.tmp.name + "-open data")
+        self.addCleanup(shutil.rmtree, new, ignore_errors=True)
+        shutil.copy2(REAL / "master" / "master-resume.template.md", self.tmp / "master")
+        self.ok("set_data_dir", path=str(new), sample=True)
+        self.ok("open_folder", which="data"); self.ok("open_folder", which="engine")
+        self.assertEqual(rec.read_text().split("\n")[:-1], [str(self.tmp), str(new), str(self.tmp)], "data, then the new data folder, then the engine")
+        before = rec.read_text()
+        for bad in ("../etc", "/", "home", ""):
+            self.assertIn("which", self.bad("open_folder", which=bad)["error"])
+        self.bad("open_folder")
+        self.assertEqual(rec.read_text(), before, "a refused request opens nothing")
+
+    def test_open_folder_says_so_when_the_opener_fails_or_the_folder_is_gone(self):
+        self._opener()
+        failing = self.tmp / "fail-open.sh"
+        failing.write_text("#!/bin/sh\necho nope >&2\nexit 3\n"); failing.chmod(0o755)
+        self.env = dict(self.env, JD_LENS_OPEN=str(failing))
+        self.assertIn("could not open the folder", self.bad("open_folder", which="data")["error"])
 
     def test_two_messages_in_one_session(self):
         p = subprocess.run([sys.executable, str(self.tmp / "tools/jobd/host.py")], input=frame({"op": "ping"}) + frame({"op": "list"}), capture_output=True, timeout=60)
@@ -176,19 +310,17 @@ class HostTest(unittest.TestCase):
     def test_build_prompt_allows_the_pdf_script_it_needs(self):
         """A build run once stopped at the PDF step: the shared shell rule said python3 scripts only, yet the PDF is made by
         tools/render_pdf.sh. The build prompt must name it as an exception and the allowlist must contain it."""
-        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "jobd"))
-        import claude_jobs
+        claude_jobs = self.import_real_claude_jobs()
         spec = claude_jobs.KINDS["build"]
         self.assertIn("Bash(tools/render_pdf.sh:*)", spec["tools"])
-        prompt = spec["prompt"].format(slug="x-2026-11", extra="", company="X", headless=claude_jobs.HEADLESS.format(slug="x-2026-11", pages="2 pages"))
+        prompt = spec["prompt"].format(slug="x-2026-11", extra="", company="X", headless=claude_jobs.HEADLESS.format(slug="x-2026-11", pages="2 pages", layout="/x/tailored/_base/layouts/two-column.html", stem="anika_verma"))
         self.assertIn("tools/render_pdf.sh", prompt)
         self.assertIn("EXCEPTION to the shell rules", prompt)
 
     def test_skill_commands_are_allowed_for_the_kinds_that_run_them(self):
         """The /job skill tells Claude to read the page target (`python3 tools/prefs.py get resume_pages`); a tailor run was
         blocked because that command was not on the allowlist. Reading is allowed, changing it is not."""
-        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "jobd"))
-        import claude_jobs
+        claude_jobs = self.import_real_claude_jobs()
         for kind in ("tailor", "build"):
             self.assertIn("Bash(python3 tools/prefs.py get:*)", claude_jobs.KINDS[kind]["tools"], kind)
         for kind, spec in claude_jobs.KINDS.items():

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """One-command setup for JD Lens. Safe to run again: it never overwrites your master resume.
 
-  python3 tools/setup.py [--no-helper] [--manifest-dir DIR]
+  python3 tools/setup.py [--no-helper] [--manifest-dir DIR] [--data-dir FOLDER]
 
+  0. with --data-dir, keeps your data (master resume, applications, tailored resumes) in FOLDER instead of this folder
   1. creates the folders the tools use
   2. creates master/master-resume.md from the template if you do not have one yet
   3. builds the skill profile the extension reads
@@ -12,6 +13,9 @@
 import pathlib, shutil, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths  # noqa: E402  (where the data folder is)
+DATA = paths.DATA
 EXT = ROOT / "tools" / "jd-capture-extension"
 
 
@@ -28,15 +32,24 @@ def run(args):
 
 
 def main():
+    global DATA
     no_helper = "--no-helper" in sys.argv
+    if "--data-dir" in sys.argv:
+        try:
+            paths.set_data_dir(sys.argv[sys.argv.index("--data-dir") + 1])
+        except (IndexError, paths.PathsError) as e:
+            print("--data-dir needs the full path of a folder:", e)
+            return 1
+        DATA = paths.data_root()
     mdir = ["--manifest-dir", sys.argv[sys.argv.index("--manifest-dir") + 1]] if "--manifest-dir" in sys.argv else []
     print("JD Lens setup")
     step(1, "Folders")
-    for d in ("master", "applications", "tailored", "views", "tools/jd-capture-extension/data"):
-        (ROOT / d).mkdir(parents=True, exist_ok=True)
-    print("    ok")
+    for d in ("master", "applications", "tailored", "views"):
+        (DATA / d).mkdir(parents=True, exist_ok=True)
+    (ROOT / "tools" / "jd-capture-extension" / "data").mkdir(parents=True, exist_ok=True)
+    print("    ok" + (f" (your data folder: {DATA})" if DATA != ROOT else ""))
     step(2, "Master resume")
-    master, template = ROOT / "master" / "master-resume.md", ROOT / "master" / "master-resume.template.md"
+    master, template = DATA / "master" / "master-resume.md", ROOT / "master" / "master-resume.template.md"
     created = False
     if master.exists():
         print("    master/master-resume.md already exists, leaving it alone")

@@ -75,6 +75,7 @@
     info: S('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'),
     chart: S('<path d="M18 20V10M12 20V4M6 20v-6"/>'),
     ext: S('<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>'),
+    folder: S('<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>'),
     arrow: S('<path d="M5 12h14M12 5l7 7-7 7"/>'),
     check: S('<path d="M20 6L9 17l-5-5"/>'),
     up: S('<path d="M12 19V5M5 12l7-7 7 7"/>'),

@@ -74,13 +74,13 @@ class AddSkillTest(unittest.TestCase):
         self.assertEqual(sum(1 for x in self.profile()["rows"] if x["skills"] in ("Python", "Terraform")), 2)
 
     def test_existing_skill_is_upgraded_not_duplicated(self):
-        self.master.write_text(self.master.read_text().replace("| Kubernetes | partial |", "| Go | earlier | F-EX-02 | | Old resume only. |\n| Kubernetes | partial |"))
-        r = self.add("Go", "--fact", "Wrote the Go microservice for order validation at Example Corp in 2021")
+        self.assertIn("| Go | earlier |", self.master.read_text())          # the sample master already lists Go as an older-resume-only skill
+        r = self.add("Go", "--fact", "Wrote the Go microservice for order validation at Northwind Labs in 2021")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("raised 'Go' from earlier to user-confirmed", r.stdout)
         t = self.master.read_text()
         self.assertEqual(t.count("| Go |"), 1)
-        self.assertIn("| Go | user-confirmed | F-EX-02, F-USR-01 |", t)
+        self.assertIn("| Go | user-confirmed | F-USR-01 |", t)
 
     def test_every_edit_keeps_its_own_backup_even_within_one_second(self):
         original = self.master.read_text()

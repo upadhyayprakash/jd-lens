@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anika Verma Resume</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap">
+<style>
+/* Layout: two-column. Sample base layout: two columns (sidebar and main), two A4 sheets. Replace the made-up content and the contact block with your own. */
+:root {
+  --desk: #E7E7E5;
+  --paper: #FFFFFF;
+  --ink: #1B1D21;
+  --ink-2: #4A4F57;
+  --ink-3: #6B717A;
+  --rule: #DADCDF;
+  --tag: #F2F3F4;
+  --font: 'Open Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--desk); color: var(--ink); font-family: var(--font);
+  font-size: 10.5pt; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  padding-block: 32px 48px; padding-left: 16px; padding-right: 16px;
+}
+.sheet {
+  width: 100%; max-width: 210mm; min-height: 297mm; margin: 0 auto 24px; background: var(--paper);
+  padding: 15mm 14mm; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.08);
+  display: grid; grid-template-columns: 58mm minmax(0, 1fr); column-gap: 9mm; align-content: start;
+}
+.sheet > header { grid-column: 1 / -1; padding-bottom: 6mm; margin-bottom: 6mm; border-bottom: 2px solid var(--ink); }
+h1 { margin: 0; font-size: 30pt; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+.role { margin: 4px 0 0; font-size: 13pt; font-weight: 400; color: var(--ink-2); }
+.summary { margin: 10px 0 0; font-size: 10.5pt; color: var(--ink-2); max-width: 165mm; }
+aside, main { min-width: 0; display: flex; flex-direction: column; gap: 6mm; }
+h2 { margin: 0 0 8px; font-size: 9pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); padding-bottom: 5px; border-bottom: 1px solid var(--rule); }
+.kv { margin: 0; display: grid; gap: 7px; }
+.kv dt { font-size: 8pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.kv dd { margin: 0; font-size: 9.5pt; overflow-wrap: anywhere; }
+a { color: inherit; text-decoration: none; }
+.skillset { display: grid; gap: 9px; }
+.skillset h3 { margin: 0 0 3px; font-size: 9pt; font-weight: 700; }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tags span { background: var(--tag); border-radius: 3px; padding: 1px 6px; font-size: 8.5pt; color: var(--ink-2); }
+.plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 9.5pt; }
+.plain small { display: block; color: var(--ink-3); font-size: 8.5pt; }
+.job { display: grid; grid-template-columns: 22mm minmax(0, 1fr); column-gap: 5mm; padding: 2px 0 10px; }
+.job + .job { border-top: 1px solid var(--rule); padding-top: 10px; }
+.when { font-size: 8.5pt; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; line-height: 1.5; }
+.job h3 { margin: 0; font-size: 11pt; font-weight: 700; }
+.job .org { margin: 1px 0 5px; font-size: 9.5pt; font-style: italic; color: var(--ink-2); }
+.job ul { margin: 0; padding-left: 14px; display: grid; gap: 3px; }
+.job li { font-size: 9.5pt; color: var(--ink); }
+.job li::marker { color: var(--ink-3); }
+.stack { margin: 5px 0 0; font-size: 8.5pt; color: var(--ink-3); }
+.lead { font-weight: 600; }
+.note { max-width: 210mm; margin: 0 auto; font-size: 9pt; color: var(--ink-3); text-align: center; }
+/* A4 fit: tighter scale so each sheet is exactly one printed page */
+.sheet{padding:11mm 12mm;grid-template-columns:52mm minmax(0,1fr);column-gap:8mm}
+.sheet>header{padding-bottom:4mm;margin-bottom:5mm}
+h1{font-size:25pt}.role{font-size:11.5pt;margin-top:2px}
+.summary{max-width:none;font-size:9.5pt;line-height:1.45;margin-top:6px}
+aside,main{gap:4.5mm}
+h2{margin-bottom:6px;padding-bottom:4px;font-size:8.5pt}
+.job{grid-template-columns:minmax(0,1fr);padding:0 0 7px}
+.job+.job{padding-top:7px}
+.when{font-size:8pt;margin:0 0 1px;line-height:1.3}
+.job h3{font-size:10.5pt;line-height:1.35}
+.job .org{font-size:9pt;margin:0 0 3px}
+.job ul{gap:2px}.job li{font-size:9pt;line-height:1.42}
+.stack{font-size:8pt;margin-top:3px}
+.skillset{gap:6px}.skillset h3{font-size:8.5pt;margin-bottom:2px}
+.tags{gap:3px}.tags span{font-size:7.8pt;padding:0 5px;line-height:1.55}
+.plain{gap:5px;font-size:9pt;line-height:1.42}.plain small{font-size:8pt}
+.kv{gap:4px}.kv dt{font-size:7.5pt}.kv dd{font-size:9pt}
+@media print {
+  @page { size: A4; margin: 0; }
+  body { background: none; padding: 0; }
+  .sheet { box-shadow: none; margin: 0; break-after: page; }
+  .sheet:last-of-type { break-after: auto; }
+  .note { display: none; }
+}
+</style>
+</head>
+<body>
+
+<article class="sheet" aria-label="Resume, page 1">
+<header>
+<h1>Anika Verma</h1>
+<p class="role">Senior Software Engineer · TypeScript, React, Node.js</p>
+<p class="summary">Software engineer with 10+ years building payments and checkout products with TypeScript, React and Node.js. Cut checkout latency by 62% at Northwind Labs and built the feature-flag service that now runs on 40 product teams.</p>
+</header>
+
+<aside aria-label="Contact and skills">
+<section>
+<h2>Contact</h2>
+<dl class="kv">
+<div><dt>Location</dt><dd>Remote (US time zones)</dd></div>
+<div><dt>Phone</dt><dd>+1 (555) 010-0142</dd></div>
+<div><dt>Email</dt><dd><a href="mailto:anika.verma@example.com">anika.verma@example.com</a></dd></div>
+<div><dt>Portfolio</dt><dd>anikaverma.example.com</dd></div>
+<div><dt>LinkedIn</dt><dd>/in/example-anika-verma</dd></div>
+<div><dt>GitHub</dt><dd>github.com/example-anika-verma</dd></div>
+</dl>
+</section>
+
+<section>
+<h2>Skills</h2>
+<div class="skillset">
+<div><h3>Frontend</h3><div class="tags"><span>React</span><span>TypeScript</span><span>Next.js</span><span>Jest</span></div></div>
+<div><h3>Backend</h3><div class="tags"><span>Node.js</span><span>NestJS</span><span>REST APIs</span><span>Kafka</span></div></div>
+<div><h3>Data</h3><div class="tags"><span>PostgreSQL</span><span>Redis</span><span>MySQL</span></div></div>
+<div><h3>Infra &amp; delivery</h3><div class="tags"><span>AWS</span><span>Docker</span><span>GitHub Actions</span></div></div>
+</div>
+</section>
+</aside>
+
+<main>
+<section aria-labelledby="exp1">
+<h2 id="exp1">Experience</h2>
+
+<div class="job">
+<p class="when">Jan 2021 to now</p>
+<div>
+<h3>Senior Software Engineer</h3>
+<p class="org">Northwind Labs · Remote</p>
+<ul>
+<li>Led the checkout rebuild in <span class="lead">React and TypeScript</span>, cutting p95 latency from 420 ms to 160 ms (62%) across web and mobile web.</li>
+<li>Built <span class="lead">Relay</span>, an internal feature-flag service on Node.js and Redis, now used by 40 product teams with zero-downtime rollouts.</li>
+<li>Designed the PostgreSQL schema for the billing service, with role-based views for finance dashboards.</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+</article>
+
+<article class="sheet" aria-label="Resume, page 2">
+<aside aria-label="Recognition and education">
+<section>
+<h2>Education</h2>
+<ul class="plain">
+<li>B.E. Computer Science<small>Hillcrest Institute of Technology, 2010 to 2014</small></li>
+</ul>
+</section>
+
+<section>
+<h2>Certifications</h2>
+<ul class="plain">
+<li>AWS Certified Developer, Associate</li>
+</ul>
+</section>
+
+<section>
+<h2>Recognition</h2>
+<ul class="plain">
+<li>Winner, Northwind Labs hackathon<small>2024, smart refunds prototype</small></li>
+</ul>
+</section>
+</aside>
+
+<main>
+<section aria-labelledby="exp2">
+<h2 id="exp2">Experience, continued</h2>
+
+<div class="job">
+<p class="when">Jul 2014 to Dec 2020</p>
+<div>
+<h3>Software Engineer</h3>
+<p class="org">Brightwave Systems · Pune</p>
+<ul>
+<li>Built the order-events pipeline on <span class="lead">Kafka and Node.js</span>, processing 2M events a day.</li>
+<li>Created the internal admin dashboard (React, Express, MySQL) used by 200 support staff, cutting ticket handling time by 25%.</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+</article>
+
+<p class="note">Sample layout with made-up content. Replace the contact block and the text with your own, keeping the structure.</p>
+</body>
+</html>

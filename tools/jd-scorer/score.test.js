@@ -26,10 +26,13 @@ test('case rules: lowercase "express", "rest", "go" are ordinary words', () => {
   assert.deepStrictEqual(extractTerms('Java and JavaScript'), ['Java', 'JavaScript']);
 });
 
+// anything that looks like an email address or a phone number (a plus sign or 7+ digits, spaces, dashes and brackets allowed)
+const NO_CONTACT_DETAILS = /[\w.+-]+@[\w-]+\.[\w.]+|\+\d[\d\s().-]{7,}/;
+
 test('profile holds no personal data', () => {
   const raw = fs.readFileSync(path.join(root, 'tools/jd-capture-extension/data/profile.json'), 'utf8');
   const withoutPath = raw.replace(profile.repo_path, '');
-  for (const bad of ['+91', '@yahoo', '88610', 'example.morgan', 'Payly', 'Lumenly']) assert.ok(!withoutPath.includes(bad), bad);
+  assert.ok(!NO_CONTACT_DETAILS.test(withoutPath), 'the profile must not hold an email address or a phone number');
   assert.deepStrictEqual(Object.keys(profile).sort(), ['career_start', 'domains', 'generated_at', 'master_modified', 'master_sha256', 'repo_path', 'rows', 'schema', 'stats']);
 });
 
@@ -115,8 +118,8 @@ test('regression: a bullet without a trailing period is a requirement, not a hea
 test('requirement units carry evidence IDs from the profile', () => {
   const r = score('Requirements\n- Strong PostgreSQL and Express\n', profile, { now: NOW });
   const terms = Object.fromEntries(r.units[0].terms.map((t) => [t.t, t]));
-  assert.ok(terms.PostgreSQL.evidence.includes('F-BR-04'), JSON.stringify(terms.PostgreSQL));
-  assert.ok(terms.Express.evidence.includes('F-USR-01'));
+  assert.ok(terms.PostgreSQL.evidence.includes('F-NW-03'), JSON.stringify(terms.PostgreSQL));
+  assert.ok(terms.Express.evidence.includes('F-BW-02'));
 });
 
 test('requirements list keeps lines with no recognisable skill and drops responsibilities', () => {
@@ -136,10 +139,10 @@ test('partial credit is configurable', () => {
 test('resume.json: readable resume data without contact details', () => {
   const raw = fs.readFileSync(path.join(root, 'tools/jd-capture-extension/data/resume.json'), 'utf8');
   const rd = JSON.parse(raw);
-  for (const bad of ['+91', '@yahoo', '88610', 'example.morgan']) assert.ok(!raw.includes(bad), bad);
-  assert.ok(rd.companies.some((c) => c.company === 'Lumenly' && c.facts.length > 3));
+  assert.ok(!NO_CONTACT_DETAILS.test(raw), 'the readable resume must not hold an email address or a phone number');
+  assert.ok(rd.companies.some((c) => c.company === 'Northwind Labs' && c.facts.length > 3));
   assert.ok(rd.summaries.length >= 2 && rd.education && rd.master_modified);
-  assert.ok(rd.facts['F-LM-02'].text.includes('14K'));
+  assert.ok(rd.facts['F-NW-01'].text.includes('160 ms'));
   assert.ok(rd.skills.some((g) => g.group === 'Backend' && g.rows.some((r) => /Express/.test(r.skills))));
 });
 

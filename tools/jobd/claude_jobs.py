@@ -16,6 +16,10 @@ JOBS = HERE / "jobs"
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 sys.path.insert(0, str(ROOT / "tools"))
 import prefs  # noqa: E402  (the resume page-count setting, master/preferences.json)
+import paths  # noqa: E402  (where your data folder is)
+import identity  # noqa: E402  (the name for file names, from the master resume)
+DATA = paths.DATA
+SEPARATE = DATA != ROOT   # engine and data are different folders: run Claude in the data folder and point it at the engine
 
 HEADLESS = (
     "HEADLESS RUN started from the user's Chrome extension. Nobody can answer questions during this run. "
@@ -29,6 +33,8 @@ HEADLESS = (
     "invent a result the script would have produced. "
     "The helper refreshes applications/INDEX.md and the HTML views for you when you finish: never run tools/jobs_table.py or "
     "tools/build_views.py in this run, and do not mention the index or the views in your summary. "
+    "Resume layout (the user's setting): the layout is {layout}. For a build, run `python3 tools/prepare_resume.py {slug}` first: it copies that layout to tailored/{slug}/{stem}_resume_<company>.html and fills in the contact block and the photo from the master resume. Then apply the approved edits to that file with Read and Edit, keeping the layout's CSS and structure, and name the PDF the same way (.pdf). "
+    "Never run python3 -c, heredocs, cat, sed or awk: to look inside a file use Read, to change it use Edit or Write. "
     "Resume page target (the user's setting): {pages}. It is given here, so you do not need to look it up; tailor and trim to it, and tools/check_resume.py checks the same setting. "
     "Follow the skill's rules. Never commit, push or message anyone. Finish with one short plain summary line "
     "about the result for the user (the scores, the main gaps, anything unconfirmed), not about how you worked."
@@ -63,7 +69,7 @@ KINDS = {
                   "EXCEPTION to the shell rules above, for this build only: you may also run `tools/render_pdf.sh tailored/{slug}/<file>.html` "
                   "(this is how the PDF is made; it is not a python3 script) and `pdftoppm`, still ONE command per call with no cd, &&, ; or pipes. "
                   "Then run `python3 tools/check_resume.py <pdf> --keywords ... --forbid ...` as the skill says. Do not stop before the PDF exists unless a command is denied.",
-        "tools": READ + [JOBS_PY, PREFS_GET, "Bash(tools/render_pdf.sh:*)", "Bash(python3 tools/check_resume.py:*)", "Bash(pdftoppm:*)",
+        "tools": READ + [JOBS_PY, PREFS_GET, "Bash(python3 tools/prepare_resume.py:*)", "Bash(tools/render_pdf.sh:*)", "Bash(python3 tools/check_resume.py:*)", "Bash(pdftoppm:*)",
                          "Bash(python3 tools/build_views.py:*)", "Bash(cp:*)", "Bash(mkdir:*)", "Edit", "Write"],
         "may_write": ["tailored/", "applications/", "views/"],
     },
@@ -91,6 +97,26 @@ def _config():
     return json.loads(p.read_text()) if p.exists() else {}
 
 
+
+def _abs_tools(x):
+    """In a separate data folder the run does not start next to tools/, so every `tools/<name>` in the prompts and allowlists
+    becomes the engine's absolute tools path. With one folder nothing changes."""
+    if not SEPARATE:
+        return x
+    if isinstance(x, str):
+        return re.sub(r"(?<![\w/.~-])tools/", str(ROOT / "tools") + "/", x)
+    if isinstance(x, list):
+        return [_abs_tools(i) for i in x]
+    if isinstance(x, dict):
+        return {k: _abs_tools(v) for k, v in x.items()}
+    return x
+
+
+HEADLESS = _abs_tools(HEADLESS) + (
+    f" The engine is in {ROOT}: wherever the skill says `tools/<name>`, run it as `{ROOT}/tools/<name>` (the full path, exactly as written here). "
+    f"Your working folder is the user's data folder, {DATA}; master/, applications/ and tailored/ are in it." if SEPARATE else "")
+KINDS = _abs_tools(KINDS)
+
 def claude_bin():
     b = os.environ.get("JOBD_CLAUDE") or _config().get("claude") or shutil.which("claude", path=_path())
     if not b:
@@ -106,7 +132,7 @@ def _path():
 def _app_exists(slug):
     if not SLUG_RE.match(slug or ""):
         raise JobError(f"invalid slug: {slug!r}")
-    f = ROOT / "applications" / f"{slug}.md"
+    f = DATA / "applications" / f"{slug}.md"
     if not f.exists():
         raise JobError(f"no such application: {slug}")
     return f
@@ -121,15 +147,15 @@ def _git_snapshot():
     """{path: fingerprint} for every file git sees as changed or untracked, or None outside a git repo. The fingerprint is a
     hash of the file's content, so a file that was already modified before the job and changes again still shows up, and
     one that merely stays modified does not."""
-    if not (ROOT / ".git").exists():
+    if not (DATA / ".git").exists():
         return None
-    r = subprocess.run(["git", "status", "--porcelain", "-z", "--no-renames", "--untracked-files=all"], cwd=str(ROOT), capture_output=True, text=True)
+    r = subprocess.run(["git", "status", "--porcelain", "-z", "--no-renames", "--untracked-files=all"], cwd=str(DATA), capture_output=True, text=True)
     snap = {}
     for entry in r.stdout.split("\0"):
         if len(entry) < 4:
             continue
         path = entry[3:]
-        f = ROOT / path
+        f = DATA / path
         try:
             if f.is_file() and f.stat().st_size <= 20_000_000:
                 snap[path] = hashlib.sha1(f.read_bytes()).hexdigest()
@@ -166,16 +192,19 @@ def start(kind, slug, extra=""):
             raise JobError(f"a job is already running for {slug}: {st['id']}")
     if len(extra) > 4000:
         raise JobError("extra text is too long (4000 characters at most)")
-    prompt = spec["prompt"].format(slug=slug, extra=extra, company=_company(slug), headless=HEADLESS.format(slug=slug, pages=prefs.pages_phrase()))
+    prompt = spec["prompt"].format(slug=slug, extra=extra, company=_company(slug), headless=HEADLESS.format(slug=slug, pages=prefs.pages_phrase(), layout=prefs.layout_file(), stem=identity.read()["file_stem"]))
     if extra and kind != "answers":
         prompt += f"\n\nthe user's instructions for this run: {extra}"
     jid = time.strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:6]
     cmd = [claude_bin(), "-p", prompt, "--output-format", "json", "--permission-mode", "dontAsk",
-           "--max-budget-usd", str(spec["budget"]), "--allowedTools", *spec["tools"]]
+           "--max-budget-usd", str(spec["budget"])]
+    if SEPARATE:
+        cmd += ["--add-dir", str(ROOT)]       # the /job skill lives in the engine, not in the data folder
+    cmd += ["--allowedTools", *spec["tools"]]
     shell = f"{shlex.join(cmd)} > {shlex.quote(str(JOBS / (jid + '.out')))} 2> {shlex.quote(str(JOBS / (jid + '.err')))}; echo $? > {shlex.quote(str(JOBS / (jid + '.exit')))}"
-    env = dict(os.environ, PATH=_path())
+    env = dict(os.environ, PATH=_path(), JD_LENS_DATA=str(DATA))
     before = _git_snapshot()
-    proc = subprocess.Popen(["/bin/sh", "-c", shell], cwd=str(ROOT), env=env, start_new_session=True,
+    proc = subprocess.Popen(["/bin/sh", "-c", shell], cwd=str(DATA), env=env, start_new_session=True,
                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     state = {"id": jid, "kind": kind, "slug": slug, "pid": proc.pid, "started": time.time(),
              "may_write": spec["may_write"], "git_before": before}
@@ -200,7 +229,7 @@ def _finalize(jid):
     for script, args in (("jobs_table.py", []), ("build_views.py", ["--no-pdf"])):
         p = ROOT / "tools" / script
         if p.exists():
-            subprocess.run([sys.executable, str(p), *args], cwd=str(ROOT), capture_output=True, timeout=120)
+            subprocess.run([sys.executable, str(p), *args], cwd=str(DATA), capture_output=True, timeout=120)
     marker.write_text(time.strftime("%Y-%m-%d %H:%M:%S"))
 
 

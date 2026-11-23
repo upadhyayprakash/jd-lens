@@ -22,6 +22,8 @@ Read **[docs/GETTING-STARTED.md](docs/GETTING-STARTED.md)** (about 10 minutes). 
 3. Load `tools/jd-capture-extension/` in Chrome (`chrome://extensions`, Developer mode, Load unpacked).
 4. Install the local helper once: `python3 tools/jobd/install.py`.
 
+By default your data lives in this folder. To keep it somewhere else (for example your own private repo), choose a data folder in Settings or run `python3 tools/setup.py --data-dir "/full/path"`; see [the guide](docs/GETTING-STARTED.md#keeping-your-data-in-its-own-folder).
+
 ## What is in this repo
 | Path | What |
 |------|------|
@@ -31,7 +33,7 @@ Read **[docs/GETTING-STARTED.md](docs/GETTING-STARTED.md)** (about 10 minutes). 
 | `tools/*.py` | Profile builder, application tracking, checks, packaging |
 | `.claude/skills/job/` | The `/job` skill for Claude Code |
 | `master/master-resume.template.md` | A sample master resume (made-up data) |
-| `tailored/_base/resume-base.html` | A sample resume layout (made-up content) |
+| `tailored/_base/layouts/` | Three sample resume layouts (basic, two-column, with photo), with made-up content |
 | `docs/` | Getting started, architecture decisions (ADRs), design notes, store listing and release notes |
 
 Your own data (`master/master-resume.md`, `applications/`, `tailored/`, `stories/`, `answers/`, built profile files) is git-ignored: it stays in your clone.
