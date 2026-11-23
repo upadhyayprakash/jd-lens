@@ -840,7 +840,7 @@
                 : h('button', { class: 'btn primary block', disabled: !helperOk() || claudeBusy() ? true : null, on: { click: () => startJob('build', slug) } }, 'Approve and build PDF', h('span', { class: 'claude' }, 'uses Claude')),
               h('button', { class: 'btn block', on: { click: () => { state.feedback = true; render(); } } }, 'Request changes'))) : null,
       terminal(cmd(`claude "/job tailor ${slug}"`))));
-    s.push(h('div', { class: 'step-wrap', id: 'step-missing' }, stepRow(4, 'Add missing skills', 'Confirm skills you really have in your master file.', h('button', { class: 'btn action', on: { click: () => { state.evTab = 'missing'; render(); const el = document.getElementById('evidence'); if (el) el.scrollIntoView({ block: 'start' }); } } }, 'View gaps', ic('arrow')), true)));
+    s.push(h('div', { class: 'step-wrap', id: 'step-missing' }, stepRow(4, 'Add missing skills', 'Confirm skills you really have in your master file.', h('button', { class: 'btn action', on: { click: () => openKeySkills('missing') } }, 'View gaps', ic('arrow')), true)));
     s.push(h('div', { class: 'step-wrap' }, stepRow(5, 'Review before applying', 'Make sure your resume aligns with the JD.', app && app.resume_exists ? h('span', { class: 'btn done' }, ic('check'), 'Resume built') : h('button', { class: 'btn action', on: { click: () => goJd('details') } }, 'Review JD', ic('arrow')), true),
       terminal(cmd(`claude "/job build ${slug}"`))));
     s.push(h('div', { class: 'step-wrap' }, stepRow(6, 'Not for me', 'Mark this JD as skipped (withdrawn).', app ? h('button', { class: 'btn action', disabled: helperOk() ? null : true, on: { click: () => setStatus(slug, 'withdrawn') } }, 'Skip', ic('arrow')) : h('span', { class: 'faint' }, 'Save first')),

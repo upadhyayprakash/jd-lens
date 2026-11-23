@@ -206,5 +206,7 @@ June 03, 2026`;
       if (params.has('choosing')) state.dataChoice = { path: '/Users/example/My Resume Data', sample: true, has_master: params.get('choosing') !== 'empty' };     // the confirm card, as if a folder was just picked
     },
   };
+  // test hook: click the first button whose label starts with this text, once the panel has drawn (the render checks only read the page, they cannot click)
+  if (params.has('click')) setTimeout(() => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim().startsWith(params.get('click'))); if (b) b.click(); }, 1500);
   if (params.has('mockwidth')) { const st2 = document.createElement('style'); st2.textContent = '#app{max-width:' + Number(params.get('mockwidth')) + 'px;margin:0}'; document.head.append(st2); }
 })();
