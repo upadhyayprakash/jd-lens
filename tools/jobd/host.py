@@ -181,9 +181,29 @@ def op_choose_data_dir(a):
     return {"path": r.stdout.strip().rstrip("/") or r.stdout.strip()}
 
 
+def _sync_cache(info):
+    """Make the extension's generated cache (the skill profile it scores with) match the data folder: rebuild it from the master
+    resume there, or clear it when there is none, so the panel never scores against a folder you have left."""
+    out = {"profile_rebuilt": False, "cache_cleared": False}
+    if info["has_master"]:
+        r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_profile.py")], cwd=str(ROOT), capture_output=True, text=True, timeout=120,
+                           env=dict(os.environ, JD_LENS_DATA=""))
+        out["profile_rebuilt"] = r.returncode == 0
+        if r.returncode != 0:
+            out["profile_error"] = (r.stderr or r.stdout).strip()[-400:]
+    else:
+        for n in ("profile.json", "resume.json", "applications.json"):
+            f = DATA_DIR / n
+            if f.exists():
+                f.unlink()
+                out["cache_cleared"] = True
+    return out
+
+
 def op_set_data_dir(a):
-    """Use this folder for the user's data. `sample` adds the made-up sample master resume if the folder has none. The skill profile
-    the extension reads is rebuilt from the new folder, so the panel scores against the right resume straight away."""
+    """Use this folder for the user's data. `sample` adds the made-up sample master resume if the folder has none. Whatever the folder
+    already holds is used as it is (nothing is copied, merged or deleted). The skill profile the extension reads is rebuilt from the new
+    folder (or cleared when it has no master resume), so the panel scores against the right resume straight away."""
     path = need(a, "path")
     try:
         added = paths.init_data_folder(path) if a.get("sample") else False
@@ -191,20 +211,13 @@ def op_set_data_dir(a):
     except paths.PathsError as e:
         raise OpError(str(e))
     info = paths.info()
-    out = dict(info, sample_added=added, profile_rebuilt=False)
-    if info["has_master"]:
-        r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_profile.py")], cwd=str(ROOT), capture_output=True, text=True, timeout=120,
-                           env=dict(os.environ, JD_LENS_DATA=""))
-        out["profile_rebuilt"] = r.returncode == 0
-        if r.returncode != 0:
-            out["profile_error"] = (r.stderr or r.stdout).strip()[-400:]
-    return out
-
+    return dict(info, sample_added=added, **_sync_cache(info))
 
 def op_clear_data_dir(a):
+    """Go back to keeping the data in the engine folder. Nothing in the folder you leave is touched."""
     paths.clear_data_dir()
-    return dict(paths.info(), profile_rebuilt=False)
-
+    info = paths.info()
+    return dict(info, **_sync_cache(info))
 
 PHOTO_EXT = {".jpg", ".jpeg", ".png", ".heic", ".gif", ".tif", ".tiff", ".bmp", ".webp"}
 PHOTO_MAX_BYTES = 25_000_000

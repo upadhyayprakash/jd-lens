@@ -378,6 +378,18 @@
     if (!r.ok) { state.error = r.error; render(); return; }
     await openFile(pdf ? r.pdf : r.html);
   }
+  // No skill profile (the generated cache the panel scores with): say what to do for the situation the user is really in.
+  function noProfileView() {
+    const hp = state.helper;
+    if (!hp) return [];                                                   // the helper has not answered yet
+    if (hp.ok && hp.has_master === false)                                 // the notice at the top already offers the way out
+      return [h('div', { class: 'faint', style: 'padding:.25rem' }, 'Scoring starts once your data folder has a master resume.')];
+    if (hp.ok)                                                            // a master resume exists: the profile only has to be built
+      return [h('div', { class: 'banner warn stack', id: 'no-profile' }, h('div', null, h('b', null, 'No skill profile yet. '), 'It is built from your master resume and scores every job you open.'),
+        h('div', { class: 'row' }, h('button', { class: 'btn small action', on: { click: rebuildProfile } }, 'Build it now', ic('arrow'))))];
+    return [h('div', { class: 'banner warn stack', id: 'finish-setup' }, h('div', null, h('b', null, 'Finish setup. '), 'JD Lens needs a one-time setup on this computer. In Terminal, in the folder where you downloaded JD Lens, run:'),
+      cmdRow('python3 tools/setup.py'), h('div', { class: 'faint' }, 'Then reload this extension (chrome://extensions) and reopen the panel.'))];
+  }
   async function rebuildProfile() {
     const r = await A.host('rebuild_profile');
     if (!r.ok) { state.error = r.error; render(); return; }
@@ -445,7 +457,7 @@
   function banners() {
     const out = [];
     if (state.error) out.push(h('div', { class: 'banner bad', role: 'alert' }, h('div', { class: 'grow' }, h('b', null, 'Something went wrong. '), state.error)));
-    if (state.helper && !state.helper.ok) {
+    if (state.helper && !state.helper.ok && state.profile) {
       out.push(h('div', { class: 'banner warn stack' }, h('div', null, h('b', null, 'Local helper not connected. '), 'Scoring works, but saving, status changes and Claude actions need the helper. Install it once:'), cmdRow(cmd('python3 tools/jobd/install.py'))));
     }
     if (state.helper && state.helper.ok && state.helper.has_master === false) {
@@ -954,7 +966,7 @@
   function jdView() {
     const s = state.scan;
     if (!s || !s.ok) return [emptyView()];
-    if (!state.profile) return [h('div', { class: 'banner warn stack' }, h('div', null, h('b', null, 'No skill profile yet. '), 'Build it once, then press Refresh:'), cmdRow(cmd('python3 tools/build_profile.py')))];
+    if (!state.profile) return noProfileView();
     const c = jobCtx();
     if (!c) return [h('div', { class: 'banner bad' }, h('div', { class: 'grow' }, state.error || 'Could not score this page.'))];
     return [jobHeader(c), contextTabs(JD_TABS, state.jdTab, (id) => { state.jdTab = id; }), jobCard(), ...{ overview: overviewTab, analysis: analysisTab, details: detailsTab, resources: resourcesTab }[state.jdTab](c)];
@@ -990,7 +1002,7 @@
   }
   function skillsTab(rc) {
     const rs = rc.resume;
-    if (!rs) return [h('div', { class: 'banner warn stack' }, h('div', null, h('b', null, 'No readable resume yet. '), 'Build it once, then reopen this tab:'), cmdRow(cmd('python3 tools/build_profile.py')))];
+    if (!rs) return state.helper && state.helper.ok ? [h('div', { class: 'banner warn stack' }, h('div', null, h('b', null, 'No readable resume yet. '), 'It is built from your master resume.'), h('div', { class: 'row' }, h('button', { class: 'btn small action', on: { click: rebuildProfile } }, 'Build it now', ic('arrow'))))] : noProfileView();
     return [h('div', { class: 'banner info' }, ic('info'), h('div', { class: 'grow' }, 'Levels decide what counts when a JD is scored. Tap an evidence ID to read the fact behind a skill.')),
       ...rs.skills.map((g) => h('div', { class: 'card' }, h('div', { class: 'card-title' }, g.group),
         g.rows.map((row) => h('div', { class: 'skill-row' }, h('div', { class: 'between' }, h('span', { class: 'skill-name' }, row.skills), h('span', { class: 'pill lv-' + row.level }, LEVEL_LABEL[row.level] || row.level)),
@@ -1009,6 +1021,7 @@
         (rs.awards || []).length ? h('details', { class: 'terminal' }, h('summary', null, `Awards (${rs.awards.length})`), h('ul', { class: 'bul' }, rs.awards.map((f) => h('li', null, f.text)))) : null) : null];
   }
   function resumeView() {
+    if (!state.profile) return [currentJobStrip(), ...noProfileView()];
     const rc = resumeCtx();
     return [currentJobStrip(), contextTabs(RESUME_TABS, state.resumeTab, (id) => { state.resumeTab = id; }), ...{ profile: profileTab, skills: skillsTab, experience: experienceTab }[state.resumeTab](rc)];
   }

@@ -117,14 +117,25 @@ class HostTest(unittest.TestCase):
         back = self.ok("clear_data_dir")
         self.assertEqual((back["data"], back["separate"]), (str(self.tmp), False))
         self.assertEqual(len(self.ok("list")["applications"]), 3)
+        self.assertTrue(back["profile_rebuilt"], "going back rebuilds the cache from the engine folder's master resume")
+        prof = json.loads((self.tmp / "tools" / "jd-capture-extension" / "data" / "profile.json").read_text())
+        self.assertEqual(prof["repo_path"], str(self.tmp))
 
     def test_set_data_dir_without_sample_leaves_an_empty_folder_and_says_so(self):
         new = self.tmp.parent / (self.tmp.name + "-empty")
         self.addCleanup(shutil.rmtree, new, ignore_errors=True)
+        self.ok("rebuild_profile")                                       # a cache exists, built from the engine folder's master resume
+        cache = self.tmp / "tools" / "jd-capture-extension" / "data"
+        self.assertTrue((cache / "profile.json").is_file())
         r = self.ok("set_data_dir", path=str(new))
         self.assertEqual((r["has_master"], r["profile_rebuilt"], r["sample_added"]), (False, False, False))
+        self.assertTrue(r["cache_cleared"], "a folder with no master resume must not leave the old folder's skill profile behind")
+        self.assertFalse([n for n in ("profile.json", "resume.json", "applications.json") if (cache / n).exists()])
         self.assertFalse((new / "master").exists(), "nothing is created unless the sample was asked for")
         self.assertFalse(self.ok("ping")["has_master"])
+        back = self.ok("clear_data_dir")                                 # back to the engine folder, which has its master resume
+        self.assertTrue(back["profile_rebuilt"] and (cache / "profile.json").is_file())
+        self.assertFalse(back["cache_cleared"])
 
     def test_set_data_dir_rejects_bad_paths(self):
         self.assertIn("full path", self.bad("set_data_dir", path="relative/folder")["error"])

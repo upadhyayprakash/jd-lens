@@ -36,6 +36,13 @@ class FreshDownloadTest(unittest.TestCase):
         for text in ("Load unpacked", "replace the sample data", "docs/GETTING-STARTED.md"):
             self.assertIn(text, r.stdout)
 
+    def test_build_profile_without_a_master_resume_explains_what_to_do_instead_of_crashing(self):
+        r = self.py("build_profile.py")                       # a fresh download: the template is there, the master resume is not
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("No master resume", r.stderr)
+        self.assertIn("python3 tools/setup.py", r.stderr)
+        self.assertNotIn("Traceback", r.stderr)
+
     def test_setup_with_a_data_folder_keeps_the_data_there_and_the_doctor_agrees(self):
         data = self.tmp.parent / (self.tmp.name + "-my data")
         self.addCleanup(shutil.rmtree, data, ignore_errors=True)

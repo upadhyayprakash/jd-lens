@@ -190,7 +190,7 @@ June 03, 2026`;
     openUrl: async (u) => { console.log('open', u); },
     openPanelTab: async () => { console.log('open panel in a tab'); },
     openApps: async (slug) => { console.log('open applications', slug); },
-    loadJSON: async (p) => (p.endsWith('profile.json') ? profile : p.endsWith('resume.json') ? (st === 'noresume' ? null : resume) : { applications: saved }),
+    loadJSON: async (p) => (p.endsWith('profile.json') ? (params.has('noprofile') ? null : profile) : p.endsWith('resume.json') ? (st === 'noresume' || params.has('noprofile') ? null : resume) : { applications: saved }),
     connect: () => {},
     requestAutoScan: async () => true,
     hasAutoScan: async () => false,

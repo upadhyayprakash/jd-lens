@@ -180,6 +180,9 @@ def build():
 
 
 def main():
+    if not MASTER.exists():
+        print(f"No master resume at {MASTER}.\nRun `python3 tools/setup.py` (it creates one from the sample), or choose your data folder in the panel's Settings.", file=sys.stderr)
+        sys.exit(1)
     CACHE.mkdir(parents=True, exist_ok=True)
     pf = CACHE / "profile.json"
     if "--check" in sys.argv:
