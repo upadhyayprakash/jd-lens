@@ -1,6 +1,6 @@
 # JD Lens
 
-[![JD Lens: score any job against your resume. Click to watch the 2 minute demo](docs/images/jd-lens-overview.png)](https://youtu.be/LMyvg42zjc8)
+[![JD Lens: score any job against your resume. Click to watch the 2 minute demo](docs/images/jd-lens-overview-v2.png)](https://youtu.be/LMyvg42zjc8)
 
 [Watch the 2 minute demo](https://youtu.be/LMyvg42zjc8)
 
