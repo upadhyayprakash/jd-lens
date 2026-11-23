@@ -307,8 +307,10 @@ def op_profile_status(a):
     pf = ROOT / "tools" / "jd-capture-extension" / "data" / "profile.json"
     master = DATA / "master" / "master-resume.md"
     sha = hashlib.sha256(master.read_text(encoding="utf-8").encode("utf-8")).hexdigest() if master.exists() else None
-    if not pf.exists():
-        return {"current": False, "reason": "no profile built yet"}
+    if sha is None:                       # nothing to be older than: the panel offers to choose a data folder instead
+        return {"current": None, "reason": "no master resume"}
+    if not pf.exists():                   # the master resume is there; the profile only has to be built (not "out of date")
+        return {"current": False, "missing": True, "reason": "no profile built yet"}
     p = json.loads(pf.read_text())
     return {"current": p.get("master_sha256") == sha, "generated_at": p.get("generated_at"), "rows": len(p.get("rows", []))}
 

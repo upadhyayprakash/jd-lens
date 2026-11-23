@@ -160,7 +160,7 @@ June 03, 2026`;
         case 'choose_data_dir': return { ok: true, path: '/Users/example/My Resume Data' };
         case 'set_data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: a.path, source: 'config', separate: true, has_master: true, sample_added: !!a.sample, profile_rebuilt: true };
         case 'clear_data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: '/Users/example/jd-lens', source: 'engine', separate: false, has_master: true, profile_rebuilt: false };
-        case 'profile_status': return { ok: true, current: st !== 'stale' };
+        case 'profile_status': return params.has('noprofile') ? (params.get('nomaster') ? { ok: true, current: null, reason: 'no master resume' } : { ok: true, current: false, missing: true }) : { ok: true, current: st !== 'stale' };
         case 'list': return { ok: true, applications: saved };
         case 'show': { const x = saved.find((s) => s.slug === a.slug) || saved[0]; return { ok: true, application: Object.assign({}, x, { rounds: ROUNDS[x.slug] || [], history: HIST[x.slug] || [['' + x.added, '-', x.status, 'Added']],
           files: { application: profile.repo_path + '/applications/' + x.slug + '.md', resume: x.resume ? profile.repo_path + '/' + x.resume : '', details_html: profile.repo_path + '/views/applications.html#' + x.slug } }) }; }

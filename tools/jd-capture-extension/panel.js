@@ -158,7 +158,7 @@
   async function refreshHelper() {
     const r = await A.host('ping');
     state.helper = r;
-    if (r.ok) { const ps = await A.host('profile_status'); state.stale = ps.ok && ps.current === false; const pr = await A.host('get_prefs'); if (pr.ok) state.prefs = pr.prefs; const ph = await A.host('photo_info'); state.photo = ph.ok ? ph : { has_photo: false }; }
+    if (r.ok) { const ps = await A.host('profile_status'); state.stale = ps.ok && ps.current === false && !ps.missing; const pr = await A.host('get_prefs'); if (pr.ok) state.prefs = pr.prefs; const ph = await A.host('photo_info'); state.photo = ph.ok ? ph : { has_photo: false }; }
   }
   async function setPages(v) {
     const r = await A.host('set_pref', { key: 'resume_pages', value: String(v) });

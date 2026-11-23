@@ -218,6 +218,25 @@ class HostTest(unittest.TestCase):
         self.env = dict(self.env, JD_LENS_OPEN=str(failing))
         self.assertIn("could not open the folder", self.bad("open_folder", which="data")["error"])
 
+    def test_profile_status_tells_apart_no_master_no_profile_and_out_of_date(self):
+        """The panel offers 'Rebuild now' only for a profile that is out of date. With no master resume there is nothing to rebuild from."""
+        cache = self.tmp / "tools" / "jd-capture-extension" / "data" / "profile.json"
+        cache.unlink(missing_ok=True)
+        master = self.tmp / "master" / "master-resume.md"
+        saved = master.read_text()
+        master.unlink()
+        r = self.ok("profile_status")
+        self.assertEqual((r["current"], r["reason"]), (None, "no master resume"), "no master resume: not 'stale'")
+        master.write_text(saved)
+        r = self.ok("profile_status")
+        self.assertEqual((r["current"], r["missing"]), (False, True), "master resume but no profile: missing, not stale")
+        self.ok("rebuild_profile")
+        r = self.ok("profile_status")
+        self.assertTrue(r["current"] and not r.get("missing"))
+        master.write_text(saved + "\nedited\n")
+        r = self.ok("profile_status")
+        self.assertEqual((r["current"], r.get("missing")), (False, None), "a master resume that changed after the profile was built: stale")
+
     def test_two_messages_in_one_session(self):
         p = subprocess.run([sys.executable, str(self.tmp / "tools/jobd/host.py")], input=frame({"op": "ping"}) + frame({"op": "list"}), capture_output=True, timeout=60)
         a, b = unframe(p.stdout)
@@ -252,7 +271,8 @@ class HostTest(unittest.TestCase):
 
     def test_profile_and_views(self):
         (self.tmp / "tools/jd-capture-extension/data/profile.json").unlink(missing_ok=True)
-        self.assertFalse(self.ok("profile_status")["current"])  # no profile yet
+        r = self.ok("profile_status")
+        self.assertEqual((r["current"], r.get("missing")), (False, True), "a master resume but no profile: it only has to be built")
         self.ok("rebuild_profile")
         self.assertTrue(self.ok("profile_status")["current"])
         (self.tmp / "master/master-resume.md").write_text((self.tmp / "master/master-resume.md").read_text() + "\nextra\n")
