@@ -1,5 +1,9 @@
 # JD Lens
 
+[![JD Lens: score any job against your resume. Click to watch the 2 minute demo](docs/images/jd-lens-overview.png)](https://youtu.be/LMyvg42zjc8)
+
+[Watch the 2 minute demo](https://youtu.be/LMyvg42zjc8)
+
 A Chrome side panel that scores a job description against **your own resume data**, then helps you tailor a resume and prepare for the interview. Everything runs on your computer: no account, no server, no analytics.
 
 - **Instant score** for the page you are on: keyword match, offered salary, red flags (location, a stale posting, scam signals), no AI needed.
