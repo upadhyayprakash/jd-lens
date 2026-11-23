@@ -157,7 +157,7 @@ June 03, 2026`;
         case 'remove_photo': return { ok: true, has_photo: false };
         case 'open_folder': return a.which === 'data' || a.which === 'engine' ? { ok: true, opened: '/Users/example/My Resume Data' } : { ok: false, error: "which must be 'data' or 'engine'" };
         case 'data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: '/Users/example/My Resume Data', source: 'config', separate: true, has_master: true };
-        case 'choose_data_dir': return { ok: true, path: '/Users/example/My Resume Data' };
+        case 'choose_data_dir': return { ok: true, path: '/Users/example/My Resume Data', has_master: !params.has('emptychoice') };
         case 'set_data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: a.path, source: 'config', separate: true, has_master: true, sample_added: !!a.sample, profile_rebuilt: true };
         case 'clear_data_dir': return { ok: true, engine: '/Users/example/jd-lens', data: '/Users/example/jd-lens', source: 'engine', separate: false, has_master: true, profile_rebuilt: false };
         case 'profile_status': return params.has('noprofile') ? (params.get('nomaster') ? { ok: true, current: null, reason: 'no master resume' } : { ok: true, current: false, missing: true }) : { ok: true, current: st !== 'stale' };
@@ -203,6 +203,7 @@ June 03, 2026`;
       if (st === 'proposal') { state.proposal = (await window.MockApi.host('read_section', { slug: 'northwind-2026-11', section: 'Tailoring proposal' })).text;
         state.job = { job: 'x', kind: 'tailor', slug: 'northwind-2026-11', state: 'done', result: 'Proposal written to the application file.', cost_usd: 0.31 }; }
       if (params.has('open')) params.get('open').split(',').forEach((id) => { state.factOpen[id] = true; });
+      if (params.has('choosing')) state.dataChoice = { path: '/Users/example/My Resume Data', sample: true, has_master: params.get('choosing') !== 'empty' };     // the confirm card, as if a folder was just picked
     },
   };
   if (params.has('mockwidth')) { const st2 = document.createElement('style'); st2.textContent = '#app{max-width:' + Number(params.get('mockwidth')) + 'px;margin:0}'; document.head.append(st2); }

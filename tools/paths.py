@@ -15,6 +15,7 @@ tools at it; the first of these that is set wins:
   python3 tools/paths.py set <folder>    use this folder for your data (it is created if it does not exist)
   python3 tools/paths.py clear           go back to keeping data in the engine folder
   python3 tools/paths.py init <folder>   create the folders and the sample master resume in <folder> (never overwrites)
+  python3 tools/paths.py check <folder>  say whether <folder> already has a master resume (changes nothing)
 """
 import json, os, pathlib, sys, tempfile
 
@@ -77,6 +78,12 @@ def init_data_folder(folder):
     return True
 
 
+def describe_folder(folder):
+    """What a folder already holds, without changing anything: whether it has a master resume."""
+    p = _check_folder(folder)
+    return {"has_master": (p / "master" / "master-resume.md").is_file()}
+
+
 def set_data_dir(folder):
     p = _check_folder(folder)
     p.mkdir(parents=True, exist_ok=True)
@@ -124,6 +131,8 @@ def main():
         elif a[:1] == ["init"] and len(a) == 2:
             added = init_data_folder(a[1])
             print(json.dumps({"ok": True, "folder": str(pathlib.Path(a[1]).expanduser()), "sample_added": added}))
+        elif a[:1] == ["check"] and len(a) == 2:
+            print(json.dumps({"ok": True, **describe_folder(a[1])}))
         elif a[:1] == ["clear"]:
             clear_data_dir()
             print(json.dumps({"ok": True, **info()}))

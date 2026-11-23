@@ -178,7 +178,12 @@ def op_choose_data_dir(a):
         if "-128" in r.stderr:                      # the user pressed Cancel
             return {"cancelled": True}
         raise OpError("could not open the folder picker: " + r.stderr.strip()[:200])
-    return {"path": r.stdout.strip().rstrip("/") or r.stdout.strip()}
+    path = r.stdout.strip().rstrip("/") or r.stdout.strip()
+    try:
+        has_master = paths.describe_folder(path)["has_master"]
+    except paths.PathsError:
+        has_master = False
+    return {"path": path, "has_master": has_master}
 
 
 def _sync_cache(info):

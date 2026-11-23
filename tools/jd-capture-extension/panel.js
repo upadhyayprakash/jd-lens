@@ -210,11 +210,11 @@
     const c = await A.host('choose_data_dir');
     if (!c.ok) { state.error = c.error; render(); return; }
     if (c.cancelled) return;
-    state.dataChoice = { path: c.path, sample: true }; render();
+    state.dataChoice = { path: c.path, sample: true, has_master: !!c.has_master }; render();
   }
   async function applyDataFolder() {
     const ch = state.dataChoice; if (!ch) return;
-    const r = await A.host('set_data_dir', { path: ch.path, sample: !!ch.sample });
+    const r = await A.host('set_data_dir', { path: ch.path, sample: !!ch.sample && !ch.has_master });
     if (!r.ok) { state.error = r.error; render(); return; }
     await afterDataFolderChange(r.sample_added ? 'Using that folder. The sample master resume was added.' : r.has_master ? 'Using that folder.' : 'Using that folder. It has no master resume yet.');
   }
@@ -232,7 +232,8 @@
       ok ? h('dl', { class: 'kv', style: 'margin-top:.5rem' }, h('dt', null, 'Folder'), h('dd', null, pathWithOpen(hp.data || hp.repo, 'data', 'Open the data folder')), h('dt', null, 'Set by'), h('dd', null, bySource[hp.data_source] || 'the default'),
         h('dt', null, 'Master resume'), h('dd', null, hp.has_master === false ? h('span', { class: 'pill warn' }, 'not found') : h('span', { class: 'pill ok' }, 'found'))) : null,
       ok && ch ? h('div', { class: 'banner info stack', style: 'margin-top:.5rem' }, h('div', null, h('b', null, 'Use this folder? '), h('span', { style: 'overflow-wrap:anywhere' }, ch.path)),
-        h('label', { class: 'faint', style: 'display:flex;gap:.5rem;align-items:center' }, h('input', { type: 'checkbox', checked: ch.sample ? true : null, on: { change: (e) => { ch.sample = e.target.checked; } } }), 'Add the sample master resume if the folder has none'),
+        ch.has_master ? h('div', { class: 'faint' }, 'This folder already has a master resume. It will be used as it is: nothing in it is changed or replaced.')
+          : h('label', { class: 'faint', style: 'display:flex;gap:.5rem;align-items:center' }, h('input', { type: 'checkbox', checked: ch.sample ? true : null, on: { change: (e) => { ch.sample = e.target.checked; } } }), 'Add the sample master resume if the folder has none'),
         h('div', { class: 'row' }, h('button', { class: 'btn primary', on: { click: applyDataFolder } }, 'Use this folder'), h('button', { class: 'btn', on: { click: () => { state.dataChoice = null; render(); } } }, 'Cancel')))
         : ok ? h('div', { class: 'row', style: 'margin-top:.5rem' }, h('button', { class: 'btn action', on: { click: chooseDataFolder } }, 'Choose folder...'), separate() ? h('button', { class: 'btn small', on: { click: clearDataFolder } }, 'Use the engine folder') : null)
         : h('div', { class: 'faint', style: 'margin-top:.5rem' }, 'Needs the local helper (it reads and writes the folder).'));

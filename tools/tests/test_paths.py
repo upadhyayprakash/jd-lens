@@ -49,6 +49,16 @@ class PathsTest(unittest.TestCase):
         self.assertEqual((d["source"], d["separate"]), ("engine", False))
         self.assertFalse((self.engine / "jdlens.config.json").exists())
 
+    def test_check_says_whether_a_folder_has_a_master_resume_and_changes_nothing(self):
+        self.assertFalse(self.tool("paths.py", "check", str(self.data))["has_master"], "a folder that does not exist yet")
+        self.assertFalse(self.data.exists(), "checking must not create the folder")
+        self.seed_data()
+        self.assertTrue(self.tool("paths.py", "check", str(self.data))["has_master"])
+        before = (self.data / "master" / "master-resume.md").read_text()
+        self.tool("paths.py", "init", str(self.data))
+        self.assertEqual((self.data / "master" / "master-resume.md").read_text(), before, "init never replaces an existing master resume")
+        self.tool("paths.py", "check", "relative/folder", ok=False)
+
     def test_set_rejects_a_relative_path_and_a_file(self):
         self.tool("paths.py", "set", "relative/folder", ok=False)
         f = self.base / "afile"; f.write_text("x")

@@ -75,6 +75,8 @@ SCREENS = {
     "20n-no-profile-no-helper": ("screen=jd&state=nohelper&noprofile=1", 1400, ["Finish setup", "python3 tools/setup.py", "Then reload this extension", "!Local helper not connected", "!/path/to/jd-lens"]),
     "20o-no-resume-tab-helper-ok": ("screen=resume&state=applied&noprofile=1", 1400, ["No skill profile yet", "Build it now"]),
     "20p-no-readable-resume": ("screen=resume&tab=experience&state=noresume", 1400, ["No readable resume yet", "Build it now", "!python3 tools/build_profile.py"]),
+    "20q-choose-folder-with-master": ("screen=settings&state=applied&choosing=full", 3400, ["Use this folder?", "This folder already has a master resume", "used as it is", "nothing in it is changed or replaced", "!Add the sample master resume"]),
+    "20r-choose-folder-empty": ("screen=settings&state=applied&choosing=empty", 3400, ["Use this folder?", "Add the sample master resume if the folder has none", "!already has a master resume"]),
     "20-settings":          ("screen=settings&state=applied", 3200, ["Settings", "Scoring", "Scoring preferences", "Half credit", "How the score is calculated", "Tailored resume length", "1 page", "2 pages", "3 pages", "Any length", "Tailored resume layout", "Basic", "Two column", "With photo", "Your data folder", "Appearance", "Text size", "Open in a full tab", "Reading page", "Local helper", "connected", "Resume file", "Skill profile", "evidence entries", "Show what the extension holds"]),
     "21-large-text":        ("screen=jd&state=saved&scale=1.5", 3600, ["Northwind", "$60,000 - $100,000 USD", "A-", "A+"]),
     "22-max-text":          ("screen=jd&state=saved&scale=2", 4800, ["Northwind", "$60,000 - $100,000 USD"]),
