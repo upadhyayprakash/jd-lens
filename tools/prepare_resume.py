@@ -9,8 +9,9 @@ The layouts carry made-up sample contact details; every one of them is replaced 
 resume, and a line whose row is empty is left out. With the photo layout and a master/photo.jpg, the photo is linked in.
 Nothing is invented: a value comes from your master resume or it is not there.
 
-If the file already exists it is left alone (it may hold edits) unless you pass --force. Prints one line of JSON."""
-import html, json, pathlib, re, sys
+If the file already exists it is left alone (it may hold edits) unless you pass --force. With --force it starts over from the layout, and the
+previous HTML (and the PDF next to it) are first copied to tailored/<slug>/.history/, so nothing is lost. Prints one line of JSON."""
+import html, json, pathlib, re, shutil, sys, time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import identity, paths, prefs  # noqa: E402
@@ -85,6 +86,19 @@ def prepare(slug, force=False):
     info = {"ok": True, "file": str(out), "layout": prefs.load()["resume_layout"], "layout_file": str(layout), "created": False}
     if out.exists() and not force:
         return dict(info, note="already exists; edit it, or pass --force to start over")
+    backup = []
+    if out.exists():                                        # starting over: keep what was there (a rebuild is not a reason to lose it)
+        hist = out.parent / ".history"
+        hist.mkdir(exist_ok=True)
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        for old in (out, out.with_suffix(".pdf")):
+            if old.is_file():
+                n, dest = 0, hist / f"{old.stem}-{stamp}{old.suffix}"
+                while dest.exists():                        # two start-overs in one second must not replace each other's backup
+                    n += 1
+                    dest = hist / f"{old.stem}-{stamp}-{n}{old.suffix}"
+                shutil.copy2(old, dest)
+                backup.append(str(dest))
     text, replaced, removed = fill(layout.read_text(encoding="utf-8"), mine, sample_identity())
     photo = False
     if (paths.DATA / "master" / "photo.jpg").is_file():
@@ -93,7 +107,7 @@ def prepare(slug, force=False):
     leftover = [k for k, v in sample_identity().items() if k in FIELDS and v and v != mine.get(k) and v in text]
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text, encoding="utf-8")
-    return dict(info, created=True, filled=replaced, left_out=removed, photo_linked=photo, sample_values_left=leftover)
+    return dict(info, created=True, filled=replaced, left_out=removed, photo_linked=photo, sample_values_left=leftover, backed_up=backup)
 
 
 def main():

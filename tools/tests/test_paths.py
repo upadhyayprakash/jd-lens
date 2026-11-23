@@ -124,6 +124,8 @@ class PathsTest(unittest.TestCase):
         self.assertIn(f"tailored/{APP}/questions.json", prompt, "data paths stay relative to the data folder")
         self.assertIn(str(self.engine / "tailored" / "_base" / "layouts" / "two-column.html"), prompt, "the prompt names the chosen layout file")
         self.assertIn("anika_verma_resume_<company>", prompt, "and the file-name stem from the master resume")
+        self.assertIn(f"prepare_resume.py {APP} --force", prompt, "a build always starts fresh")
+        self.assertIn("never reuse or just re-check an existing file", prompt)
 
     def test_claude_runs_in_the_engine_folder_when_there_is_one_folder(self):
         (self.engine / "applications").mkdir()

@@ -95,6 +95,32 @@ class PrepareResumeTest(unittest.TestCase):
         self.assertTrue(self.prep("--force")["created"])
         self.assertNotIn("my edits", f.read_text())
 
+    def test_force_starts_over_from_the_new_layout_and_keeps_the_previous_version(self):
+        """The reported case: a resume built earlier in another layout, then the layout and photo are changed and the build is run again."""
+        r = self.prep()                                              # first build: the two-column layout, no photo
+        f = pathlib.Path(r["file"])
+        f.write_text("<html>OLD LAYOUT with my edits</html>")
+        f.with_suffix(".pdf").write_bytes(b"%PDF-old")
+        self.tool("prefs.py", "set", "resume_layout", "photo")
+        (self.data / "master" / "photo.jpg").write_bytes(b"\xff\xd8\xff\xd9")
+        kept = self.prep()                                           # without --force nothing changes
+        self.assertFalse(kept["created"])
+        self.assertIn("OLD LAYOUT", f.read_text())
+        r = self.prep("--force")
+        self.assertTrue(r["created"] and r["photo_linked"], r)
+        text = f.read_text()
+        self.assertNotIn("OLD LAYOUT", text)
+        self.assertIn('class="photo"', text, "the new layout is the photo layout")
+        self.assertIn("../../master/photo.jpg", text)
+        hist = sorted((f.parent / ".history").iterdir())
+        self.assertEqual(len(hist), 2, [h.name for h in hist])
+        self.assertEqual({h.suffix for h in hist}, {".html", ".pdf"}, "the old HTML and the old PDF are both kept")
+        self.assertIn("OLD LAYOUT", next(h for h in hist if h.suffix == ".html").read_text())
+        self.assertEqual(sorted(pathlib.Path(b).name for b in r["backed_up"]), sorted(h.name for h in hist))
+        again = self.prep("--force")                                  # a second start-over keeps this version too (the html, and the pdf still next to it)
+        self.assertEqual(len(again["backed_up"]), 2)
+        self.assertEqual(len(list((f.parent / ".history").iterdir())), 4)
+
     def test_a_layout_of_your_own_in_the_data_folder_wins(self):
         mine = self.data / "tailored" / "_base" / "layouts"; mine.mkdir(parents=True)
         (mine / "two-column.html").write_text("<html><body>my own layout for Anika Verma</body></html>")
