@@ -15,12 +15,13 @@ A Chrome side panel that scores a job description against **your own resume data
 Nothing is applied or sent for you, and resume claims only come from facts in your own master file.
 
 ## Get started
-Read **[docs/GETTING-STARTED.md](docs/GETTING-STARTED.md)** (about 10 minutes). In short:
+Three steps, about 5 minutes. They work on macOS with Chrome, Python 3.9+ and (optionally) Claude Code; [the guide](docs/GETTING-STARTED.md) has the details.
 
-1. Copy `master/master-resume.template.md` to `master/master-resume.md` and replace the sample data with your own facts.
-2. `python3 tools/setup.py`, then `python3 tools/doctor.py` to check your machine.
-3. Load `tools/jd-capture-extension/` in Chrome (`chrome://extensions`, Developer mode, Load unpacked).
-4. Install the local helper once: `python3 tools/jobd/install.py`.
+1. **Get the project.** `git clone https://github.com/upadhyayprakash/jd-lens.git`, then open Terminal in that folder.
+2. **Run setup once:** `python3 tools/setup.py`. It creates a sample master resume, builds the skill profile, installs the small local helper that lets the extension save files and run Claude, and checks your machine (`python3 tools/doctor.py` repeats the check any time).
+3. **Load the extension.** In Chrome open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and pick `tools/jd-capture-extension/`. Pin it, open a job posting and click its icon.
+
+It works straight away with the made-up sample resume. To use your own, open **Settings, Your data folder** in the panel and choose the folder that holds your resume data (it can add the sample for you), or edit `master/master-resume.md` in this folder. If a step was skipped, the panel says what is missing and what to do next. The one thing it cannot do for you is step 2: a browser extension may not install the helper itself, so that single command is needed once.
 
 By default your data lives in this folder. To keep it somewhere else (for example your own private repo), choose a data folder in Settings or run `python3 tools/setup.py --data-dir "/full/path"`; see [the guide](docs/GETTING-STARTED.md#keeping-your-data-in-its-own-folder).
 
